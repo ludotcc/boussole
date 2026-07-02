@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class BoussoleButton extends StatefulWidget {
   final String text;
   final IconData icon;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool isPrimary;
 
   const BoussoleButton({
@@ -23,77 +23,82 @@ class _BoussoleButtonState extends State<BoussoleButton> {
 
   @override
   Widget build(BuildContext context) {
+    final Color blue = const Color(0xFF3A86FF);
+    final bool enabled = widget.onPressed != null;
+
     return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onPressed();
-      },
+      onTapDown: enabled ? (_) => setState(() => _pressed = true) : null,
+      onTapUp: enabled
+          ? (_) {
+              setState(() => _pressed = false);
+              widget.onPressed?.call();
+            }
+          : null,
+      onTapCancel: enabled ? () => setState(() => _pressed = false) : null,
       child: AnimatedScale(
         duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
         scale: _pressed ? .97 : 1,
-        child: Container(
-          height: 74,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: widget.isPrimary
-                ? const LinearGradient(
-                    colors: [Color(0xff4096FF), Color(0xff47D7C9)],
-                  )
-                : null,
-            color: widget.isPrimary ? null : Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            border: widget.isPrimary
-                ? null
-                : Border.all(color: const Color(0xffD8E5FF), width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(.12),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: widget.isPrimary
-                        ? Colors.white.withOpacity(.18)
-                        : const Color(0xffEEF5FF),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    widget.icon,
-                    color: widget.isPrimary
-                        ? Colors.white
-                        : const Color(0xff3A86FF),
-                  ),
+        child: Opacity(
+          opacity: enabled ? 1 : .5,
+          child: Container(
+            height: 62,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: widget.isPrimary
+                  ? const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF4D96FF), Color(0xFF3ED8C4)],
+                    )
+                  : null,
+              color: widget.isPrimary ? null : Colors.white,
+              borderRadius: BorderRadius.circular(22),
+              border: widget.isPrimary
+                  ? null
+                  : Border.all(color: const Color(0xFFD7E6FF), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(.10),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
                 ),
-
-                const SizedBox(width: 16),
-
-                Expanded(
-                  child: Text(
-                    widget.text,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
                       color: widget.isPrimary
-                          ? Colors.white
-                          : const Color(0xff3A86FF),
+                          ? Colors.white.withOpacity(.20)
+                          : const Color(0xFFEFF5FF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      widget.icon,
+                      size: 20,
+                      color: widget.isPrimary ? Colors.white : blue,
                     ),
                   ),
-                ),
-
-                const SizedBox(width: 42),
-              ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      widget.text,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: widget.isPrimary ? Colors.white : blue,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 36),
+                ],
+              ),
             ),
           ),
         ),

@@ -31,21 +31,21 @@ class _WelcomeMascotState extends State<WelcomeMascot>
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
 
-    final mascotHeight = screenHeight * .30;
+    final mascotHeight = width * 0.70;
 
     return AnimatedBuilder(
       animation: _controller,
       builder: (_, child) {
-        final offset = math.sin(_controller.value * math.pi) * 8;
+        final offset = math.sin(_controller.value * math.pi * 2) * 5;
 
-        return Transform.translate(offset: Offset(0, -offset), child: child);
+        return Transform.translate(offset: Offset(0, offset), child: child);
       },
       child: Hero(
-        tag: "mascot",
+        tag: 'mascot',
         child: Image.asset(
-          "assets/images/mascotte/happy.png",
+          'assets/images/mascotte/happy.png',
           height: mascotHeight,
           fit: BoxFit.contain,
         ),

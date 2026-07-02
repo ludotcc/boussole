@@ -5,31 +5,62 @@ import 'app_colors.dart';
 class AppTextStyles {
   AppTextStyles._();
 
-  static const TextStyle title = TextStyle(
-    fontSize: 24,
+  // Display
+
+  static const TextStyle display = TextStyle(
+    fontSize: 40,
     fontWeight: FontWeight.bold,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle subtitle = TextStyle(
-    fontSize: 18,
+  // Titres
+
+  static const TextStyle h1 = TextStyle(
+    fontSize: 32,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textPrimary,
+  );
+
+  static const TextStyle h2 = TextStyle(
+    fontSize: 26,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
+
+  static const TextStyle h3 = TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+  );
+
+  static const TextStyle cardTitle = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+  );
+
+  // Texte courant
 
   static const TextStyle body = TextStyle(
     fontSize: 16,
     color: AppColors.textPrimary,
   );
 
-  static const TextStyle caption = TextStyle(
+  static const TextStyle small = TextStyle(
     fontSize: 14,
     color: AppColors.textSecondary,
   );
 
+  static const TextStyle caption = TextStyle(
+    fontSize: 12,
+    color: AppColors.textSecondary,
+  );
+
+  // Boutons
+
   static const TextStyle button = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w600,
     color: Colors.white,
   );
 }

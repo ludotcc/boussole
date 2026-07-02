@@ -7,11 +7,11 @@ class WelcomeLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
-    final logoSize = width * .44;
+    final logoSize = width * 0.40;
 
     return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 700),
-      tween: Tween(begin: .85, end: 1),
+      tween: Tween(begin: 0.9, end: 1),
+      duration: const Duration(milliseconds: 600),
       curve: Curves.easeOutBack,
       builder: (context, value, child) {
         return Transform.scale(
@@ -20,8 +20,12 @@ class WelcomeLogo extends StatelessWidget {
         );
       },
       child: Hero(
-        tag: "logo",
-        child: Image.asset("assets/images/logo/logo.png", width: logoSize),
+        tag: 'logo',
+        child: Image.asset(
+          'assets/images/logo/logo.png',
+          width: logoSize,
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }

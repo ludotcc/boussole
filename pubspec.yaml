@@ -1,5 +1,5 @@
 name: boussole
-description: "A new Flutter project."
+description: "Application familiale Boussole"
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -12,13 +12,27 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-  flutter_riverpod: ^2.6.1
+
+  # Navigation
   go_router: ^17.3.0
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # Local storage
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   path_provider: ^2.1.6
+
+  # UI
   flutter_animate: ^4.5.2
   google_fonts: ^8.1.0
+
+  # Firebase
+  firebase_core: ^4.1.1
+  firebase_auth: ^6.0.2
+  cloud_firestore: ^6.0.1
+  firebase_storage: ^13.0.1
 
 dev_dependencies:
   flutter_test:

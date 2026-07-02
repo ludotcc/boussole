@@ -3,19 +3,59 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color primary = Colors.blue;
+  // ---------------------------------------------------------------------------
+  // Couleurs principales Boussole
+  // ---------------------------------------------------------------------------
 
-  static const Color background = Colors.white;
+  static const Color primary = Color(0xFF2F80ED); // Bleu Boussole
+  static const Color turquoise = Color(0xFF2EC5B6);
+  static const Color violet = Color(0xFF8B5CF6);
+  static const Color gold = Color(0xFFF7C948);
+  static const Color softOrange = Color(0xFFFF9E42);
 
-  static const Color success = Color(0xFF4CAF50);
+  // ---------------------------------------------------------------------------
+  // Couleurs de statut
+  // ---------------------------------------------------------------------------
 
-  static const Color info = Color(0xFF2196F3);
+  static const Color success = Color(0xFF4CAF7D);
+  static const Color info = Color(0xFF4DA3FF);
+  static const Color warning = Color(0xFFF6B74E);
+  static const Color error = Color(0xFFE57373);
 
-  static const Color warning = Color(0xFFFF9800);
+  // ---------------------------------------------------------------------------
+  // Couleurs neutres
+  // ---------------------------------------------------------------------------
 
-  static const Color error = Color(0xFFF44336);
+  static const Color background = Color(0xFFF8FAFC);
+  static const Color surface = Color(0xFFFFFFFF);
 
-  static const Color textPrimary = Colors.black87;
+  static const Color cardSecondary = Color(0xFFF4F7FB);
 
-  static const Color textSecondary = Colors.black54;
+  static const Color border = Color(0xFFE6ECF3);
+
+  static const Color textPrimary = Color(0xFF22304A);
+  static const Color textSecondary = Color(0xFF5B6B82);
+  static const Color textDisabled = Color(0xFFA7B2C2);
+
+  // ---------------------------------------------------------------------------
+  // Dégradés
+  // ---------------------------------------------------------------------------
+
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [primary, turquoise],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+
+  static const LinearGradient magicGradient = LinearGradient(
+    colors: [turquoise, violet],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+
+  static const LinearGradient solarGradient = LinearGradient(
+    colors: [gold, softOrange],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
 }

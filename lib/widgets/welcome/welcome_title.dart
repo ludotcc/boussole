@@ -9,25 +9,28 @@ class WelcomeTitle extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          "Bienvenue dans",
+          'Bienvenue dans',
+          textAlign: TextAlign.center,
           style: GoogleFonts.nunito(
-            fontSize: width * .072,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xff20305E),
+            fontSize: width * 0.068,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF20305E),
+            height: 1,
           ),
         ),
-
-        const SizedBox(height: 4),
-
+        SizedBox(height: width * 0.01),
         Text(
-          "Boussole",
+          'Boussole',
+          textAlign: TextAlign.center,
           style: GoogleFonts.nunito(
-            fontSize: width * .14,
+            fontSize: width * 0.130,
             fontWeight: FontWeight.w900,
-            height: 1,
-            color: const Color(0xff20305E),
+            color: const Color(0xFF20305E),
+            height: 0.95,
+            letterSpacing: -1,
           ),
         ),
       ],

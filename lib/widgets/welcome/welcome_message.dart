@@ -6,56 +6,32 @@ class WelcomeMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Container(
       width: double.infinity,
-
-      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 22),
-
+      margin: EdgeInsets.symmetric(horizontal: width * 0.03),
+      padding: const EdgeInsets.symmetric(horizontal: 23, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.95),
-
-        borderRadius: BorderRadius.circular(32),
-
+        color: Colors.white.withOpacity(.96),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(.08),
-            blurRadius: 30,
-            offset: const Offset(0, 14),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-
-      child: Column(
-        children: [
-          Text(
-            "Des repères pour bien grandir,",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.nunito(
-              fontWeight: FontWeight.w800,
-              fontSize: 22,
-              color: const Color(0xff20305E),
-            ),
-          ),
-
-          const SizedBox(height: 6),
-
-          ShaderMask(
-            shaderCallback: (bounds) {
-              return const LinearGradient(
-                colors: [Color(0xff8B5CF6), Color(0xffC084FC)],
-              ).createShader(bounds);
-            },
-            child: Text(
-              "chaque jour. ❤",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(
-                fontWeight: FontWeight.w900,
-                fontSize: 22,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
+      child: Text(
+        "Des repères pour bien grandir.",
+        textAlign: TextAlign.center,
+        style: GoogleFonts.nunito(
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF20305E),
+          height: 1.3,
+        ),
       ),
     );
   }
