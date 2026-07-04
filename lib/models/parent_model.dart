@@ -1,3 +1,5 @@
+import 'user_role.dart';
+
 class ParentModel {
   final String uid;
   final String familyId;
@@ -6,6 +8,9 @@ class ParentModel {
   final String avatar;
   final DateTime createdAt;
 
+  /// Toujours "parent" pour ce modèle.
+  final UserRole role;
+
   const ParentModel({
     required this.uid,
     required this.familyId,
@@ -13,6 +18,7 @@ class ParentModel {
     required this.email,
     required this.avatar,
     required this.createdAt,
+    this.role = UserRole.parent,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +29,7 @@ class ParentModel {
       'email': email,
       'avatar': avatar,
       'createdAt': createdAt.toIso8601String(),
+      'role': role.name,
     };
   }
 
@@ -34,6 +41,10 @@ class ParentModel {
       email: map['email'] as String,
       avatar: map['avatar'] as String,
       createdAt: DateTime.parse(map['createdAt'] as String),
+      role: UserRole.values.firstWhere(
+        (e) => e.name == map['role'],
+        orElse: () => UserRole.parent,
+      ),
     );
   }
 }

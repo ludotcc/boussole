@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/child_creation_provider.dart';
-import '../providers/family_provider.dart';
-import '../providers/session_provider.dart';
 import '../widgets/avatar/avatar_grid.dart';
 import '../widgets/boussole_button.dart';
 import '../widgets/welcome/welcome_background.dart';
@@ -24,10 +22,9 @@ class _SelectChildAvatarPageState extends ConsumerState<SelectChildAvatarPage> {
   Future<void> _finishRegistration() async {
     if (_selectedAvatar == null) return;
 
-    final session = ref.read(sessionProvider);
     final draft = ref.read(childCreationProvider);
 
-    if (session == null || draft == null) {
+    if (draft == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Impossible de terminer l'inscription.")),
       );
@@ -39,25 +36,23 @@ class _SelectChildAvatarPageState extends ConsumerState<SelectChildAvatarPage> {
     });
 
     try {
-      // Mise à jour du brouillon avec l'avatar choisi
       ref.read(childCreationProvider.notifier).updateAvatar(_selectedAvatar!);
 
-      // Création de l'enfant dans Firestore
       await ref
-          .read(familyRepositoryProvider)
-          .createChild(
-            familyId: session.familyId,
-            firstName: draft.firstName,
-            age: draft.age,
-            avatar: _selectedAvatar!,
-          );
-
-      // Nettoyage du provider temporaire
-      ref.read(childCreationProvider.notifier).clear();
+          .read(childRegistrationProvider.notifier)
+          .finishRegistration(avatar: _selectedAvatar!);
 
       if (!mounted) return;
 
-      // Direction le Dashboard
+      final registrationState = ref.read(childRegistrationProvider);
+
+      if (registrationState.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(registrationState.error.toString())),
+        );
+        return;
+      }
+
       context.go('/home');
     } catch (e) {
       if (!mounted) return;
@@ -94,16 +89,12 @@ class _SelectChildAvatarPageState extends ConsumerState<SelectChildAvatarPage> {
                       color: Color(0xFF20305E),
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   const Text(
                     "Choisissez un avatar pour votre enfant.",
                     style: TextStyle(fontSize: 17, color: Color(0xFF4F5D75)),
                   ),
-
                   const SizedBox(height: 30),
-
                   Expanded(
                     child: SingleChildScrollView(
                       child: AvatarGrid(
@@ -116,9 +107,7 @@ class _SelectChildAvatarPageState extends ConsumerState<SelectChildAvatarPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
                   _isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : BoussoleButton(

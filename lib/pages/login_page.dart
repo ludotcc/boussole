@@ -1,21 +1,26 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../providers/family_provider.dart';
+import '../providers/session_provider.dart';
 import '../widgets/boussole_button.dart';
 import '../widgets/welcome/welcome_background.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -43,13 +48,82 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Future<void> _login() async {
+    if (_emailController.text.trim().isEmpty ||
+        _passwordController.text.isEmpty) {
+      _showMessage("Merci de remplir tous les champs.");
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final session = await ref
+          .read(familyRepositoryProvider)
+          .signIn(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
+
+      ref.read(sessionProvider.notifier).setSession(session);
+
+      if (!mounted) return;
+
+      context.go('/home');
+    } on FirebaseAuthException catch (e) {
+      String message = "Une erreur est survenue.";
+
+      switch (e.code) {
+        case 'user-not-found':
+          message = "Aucun compte ne correspond à cette adresse e-mail.";
+          break;
+
+        case 'wrong-password':
+          message = "Mot de passe incorrect.";
+          break;
+
+        case 'invalid-email':
+          message = "Adresse e-mail invalide.";
+          break;
+
+        case 'invalid-credential':
+          message = "Adresse e-mail ou mot de passe incorrect.";
+          break;
+
+        case 'too-many-requests':
+          message = "Trop de tentatives. Réessayez plus tard.";
+          break;
+
+        default:
+          message = e.message ?? message;
+      }
+
+      _showMessage(message);
+    } catch (e) {
+      _showMessage(e.toString());
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
           const WelcomeBackground(),
-
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -60,9 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () => context.pop(),
                     icon: const Icon(Icons.arrow_back_ios_new),
                   ),
-
                   const SizedBox(height: 10),
-
                   const Text(
                     "Connexion",
                     style: TextStyle(
@@ -71,16 +143,12 @@ class _LoginPageState extends State<LoginPage> {
                       color: Color(0xFF20305E),
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   const Text(
                     "Bienvenue !\nRetrouvez votre famille.",
                     style: TextStyle(fontSize: 18, color: Color(0xFF4F5D75)),
                   ),
-
                   const SizedBox(height: 30),
-
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -104,9 +172,7 @@ class _LoginPageState extends State<LoginPage> {
                             icon: Icons.email_outlined,
                           ),
                         ),
-
                         const SizedBox(height: 18),
-
                         TextField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
@@ -127,9 +193,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 10),
-
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
@@ -137,20 +201,18 @@ class _LoginPageState extends State<LoginPage> {
                             child: const Text("Mot de passe oublié ?"),
                           ),
                         ),
-
                         const SizedBox(height: 12),
-
-                        BoussoleButton(
-                          text: "Se connecter",
-                          icon: Icons.login_rounded,
-                          onPressed: () {},
-                        ),
+                        _isLoading
+                            ? const CircularProgressIndicator()
+                            : BoussoleButton(
+                                text: "Se connecter",
+                                icon: Icons.login_rounded,
+                                onPressed: _login,
+                              ),
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 28),
-
                   Row(
                     children: [
                       const Expanded(child: Divider()),
@@ -167,9 +229,7 @@ class _LoginPageState extends State<LoginPage> {
                       const Expanded(child: Divider()),
                     ],
                   ),
-
                   const SizedBox(height: 24),
-
                   OutlinedButton.icon(
                     onPressed: () {},
                     icon: Image.asset(
@@ -194,9 +254,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 28),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
