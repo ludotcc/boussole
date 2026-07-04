@@ -28,7 +28,7 @@ class MomentCreationNotifier extends FamilyActionNotifier {
           .createDefaultMoment(familyId: familyId, type: type);
 
       ref.invalidate(momentsProvider);
-      ref.invalidate(dayTypesProvider);
+      ref.invalidate(familyPlanningsProvider);
     });
   }
 }
@@ -48,7 +48,7 @@ class MomentOrderNotifier extends FamilyActionNotifier {
           .reorderMoments(familyId: familyId, moments: moments);
 
       ref.invalidate(momentsProvider);
-      ref.invalidate(dayTypesProvider);
+      ref.invalidate(familyPlanningsProvider);
     });
   }
 }
@@ -87,7 +87,7 @@ class MomentDuplicationNotifier extends FamilyActionNotifier {
           .duplicateMoment(familyId: familyId, moment: moment);
 
       ref.invalidate(momentsProvider);
-      ref.invalidate(dayTypesProvider);
+      ref.invalidate(familyPlanningsProvider);
     });
   }
 }
@@ -107,7 +107,7 @@ class MomentDeletionNotifier extends FamilyActionNotifier {
           .deleteMoment(familyId: familyId, momentId: momentId);
 
       ref.invalidate(momentsProvider);
-      ref.invalidate(dayTypesProvider);
+      ref.invalidate(familyPlanningsProvider);
     });
   }
 }

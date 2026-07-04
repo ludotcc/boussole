@@ -126,13 +126,13 @@ SharedPreferences (si nécessaire)
 
 # Sprint actuel
 
-Sprint 10
+Sprint 10.5
 
-Architecture dynamique des journées.
+Alignement de l'architecture avec un planning familial unique et personnalisable.
 
 Objectif :
 
-Construire une base extrêmement propre, maintenable et évolutive.
+Remplacer la logique métier orientée journées types par un planning familial simple, maintenable et évolutif.
 
 La qualité du code est prioritaire sur la vitesse.
 

@@ -13,50 +13,50 @@ class DayTypesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dayTypesAsync = ref.watch(dayTypesProvider);
+    final familyPlanningsAsync = ref.watch(familyPlanningsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Journées types')),
+      appBar: AppBar(title: const Text('Planning familial')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SectionCard(
-          title: 'Mes journées types',
+          title: 'Planning de la famille',
           icon: Icons.calendar_today_rounded,
-          child: dayTypesAsync.when(
+          child: familyPlanningsAsync.when(
             loading: () => const LoadingCard(),
 
             error: (error, stackTrace) => EmptyState(
               icon: Icons.error_outline,
-              title: 'Impossible de charger les journées.',
+              title: 'Impossible de charger le planning.',
               message: error.toString(),
             ),
 
-            data: (dayTypes) {
-              if (dayTypes.isEmpty) {
+            data: (familyPlannings) {
+              if (familyPlannings.isEmpty) {
                 return const EmptyState(
                   icon: Icons.calendar_month_outlined,
-                  title: 'Aucune journée type',
+                  title: 'Aucun planning familial',
                   message:
-                      'Commencez par créer une journée type pour votre famille.',
+                      'Commencez par préparer le planning de votre famille.',
                 );
               }
 
               return ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: dayTypes.length,
+                itemCount: familyPlannings.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
-                  final DayTypeModel dayType = dayTypes[index];
+                  final DayTypeModel planning = familyPlannings[index];
 
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const CircleAvatar(
                       child: Icon(Icons.calendar_today),
                     ),
-                    title: Text(dayType.name, style: AppTextStyles.cardTitle),
-                    subtitle: Text(dayType.type),
-                    trailing: dayType.active
+                    title: Text(planning.name, style: AppTextStyles.cardTitle),
+                    subtitle: Text(_planningSubtitle(planning.type)),
+                    trailing: planning.active
                         ? const Icon(Icons.check_circle, color: Colors.green)
                         : const Icon(
                             Icons.pause_circle_outline,
@@ -70,5 +70,15 @@ class DayTypesPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+String _planningSubtitle(String type) {
+  switch (type) {
+    case 'family_planning':
+    case 'default':
+      return 'Planning personnalisable';
+    default:
+      return 'Planning importé';
   }
 }

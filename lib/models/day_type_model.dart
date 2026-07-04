@@ -2,16 +2,17 @@ class DayTypeModel {
   final String id;
   final String familyId;
 
-  /// Nom affiché au parent.
+  /// Nom du planning familial affiché au parent.
   final String name;
 
-  /// week / weekend / holidays / custom
+  /// Type technique du planning.
+  /// Les anciennes valeurs restent lisibles pour compatibilité Firestore.
   final String type;
 
   /// Ordre d'affichage.
   final int order;
 
-  /// Liste des moments composant cette journée.
+  /// Liste des moments composant le planning familial.
   final List<String> momentIds;
 
   final bool active;

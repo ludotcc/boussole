@@ -5,8 +5,11 @@ class DayExceptionModel {
   /// Jour concerné au format yyyy-MM-dd.
   final String dateKey;
 
-  /// Journée type utilisée comme base.
+  /// Planning familial utilisé comme base.
+  /// Stocké en `dayTypeId` pour compatibilité avec les données existantes.
   final String dayTypeId;
+
+  String get familyPlanningId => dayTypeId;
 
   /// Liste des moments spécifiques à cette date.
   final List<String> momentIds;
@@ -59,6 +62,7 @@ class DayExceptionModel {
     String? familyId,
     String? dateKey,
     String? dayTypeId,
+    String? familyPlanningId,
     List<String>? momentIds,
     bool? active,
     DateTime? createdAt,
@@ -68,7 +72,7 @@ class DayExceptionModel {
       id: id ?? this.id,
       familyId: familyId ?? this.familyId,
       dateKey: dateKey ?? this.dateKey,
-      dayTypeId: dayTypeId ?? this.dayTypeId,
+      dayTypeId: familyPlanningId ?? dayTypeId ?? this.dayTypeId,
       momentIds: momentIds ?? this.momentIds,
       active: active ?? this.active,
       createdAt: createdAt ?? this.createdAt,

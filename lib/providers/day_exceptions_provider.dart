@@ -40,7 +40,7 @@ class DayExceptionSaveNotifier extends FamilyActionNotifier {
 
   Future<void> saveDayException({
     required DateTime date,
-    required String dayTypeId,
+    required String familyPlanningId,
     required List<String> momentIds,
   }) {
     return runFamilyAction((familyId) async {
@@ -49,7 +49,7 @@ class DayExceptionSaveNotifier extends FamilyActionNotifier {
           .saveDayException(
             familyId: familyId,
             date: date,
-            dayTypeId: dayTypeId,
+            familyPlanningId: familyPlanningId,
             momentIds: momentIds,
           );
 

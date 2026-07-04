@@ -52,7 +52,7 @@ class DashboardPage extends ConsumerWidget {
                     context.push('/planner');
                   },
                   icon: const Icon(Icons.calendar_today),
-                  label: const Text("Organisation de la journée"),
+                  label: const Text("Planning familial"),
                 ),
               ),
 

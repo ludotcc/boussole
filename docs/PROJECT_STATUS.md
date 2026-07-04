@@ -10,11 +10,11 @@ Le projet est en développement actif sous Flutter.
 
 ## Sprint actuel
 
-Sprint 10
+Sprint 10.5
 
-## Objectif du Sprint 10
+## Objectif du Sprint 10.5
 
-Stabiliser l’architecture dynamique autour des journées types, moments, routines et enfants.
+Aligner l’architecture dynamique sur un planning familial unique et personnalisable.
 
 ## Fonctionnalités déjà fonctionnelles
 
@@ -32,18 +32,18 @@ Stabiliser l’architecture dynamique autour des journées types, moments, routi
 - Chargement des enfants
 - Déconnexion
 - Base Firestore familles / membres / enfants
-- Premiers modèles journées types / moments / routines / étapes
+- Premiers modèles planning familial / moments / routines / étapes
 
 ## Fonctionnalités en cours
 
-- Journées types dynamiques
+- Planning familial dynamique
 - Moments dynamiques
 - Routines liées aux moments
 - Préparation de l’écran enfant “Aujourd’hui”
 
 ## Prochaine priorité
 
-Connecter les moments et journées types aux données Firestore réelles, sans casser le dashboard existant.
+Stabiliser le planning familial et préparer les prochaines évolutions sans casser le dashboard existant.
 
 ## Architecture active
 

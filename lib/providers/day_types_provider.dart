@@ -4,7 +4,7 @@ import '../models/day_type_model.dart';
 import 'family_provider.dart';
 import 'session_provider.dart';
 
-final dayTypesProvider = FutureProvider<List<DayTypeModel>>((ref) async {
+final familyPlanningsProvider = FutureProvider<List<DayTypeModel>>((ref) async {
   final session = ref.watch(sessionProvider);
 
   if (session == null) {
@@ -13,5 +13,7 @@ final dayTypesProvider = FutureProvider<List<DayTypeModel>>((ref) async {
 
   final repository = ref.watch(familyRepositoryProvider);
 
-  return repository.getDayTypes(familyId: session.familyId);
+  return repository.getFamilyPlannings(familyId: session.familyId);
 });
+
+final dayTypesProvider = familyPlanningsProvider;

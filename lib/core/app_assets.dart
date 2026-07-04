@@ -88,6 +88,9 @@ class AppAssets {
 
   static const String homework = 'assets/images/objects/homework.png';
 
+  static const String householdTasks =
+      'assets/images/objects/household_tasks.png';
+
   static const String meal = 'assets/images/objects/meal.png';
 
   static const String pants = 'assets/images/objects/pants.png';
@@ -99,6 +102,8 @@ class AppAssets {
   static const String shoes = 'assets/images/objects/shoes.png';
 
   static const String videoGames = 'assets/images/objects/video_games.png';
+
+  static const String freeTime = 'assets/images/objects/free_time.png';
 
   // ---------------------------------------------------------------------------
   // Récompenses

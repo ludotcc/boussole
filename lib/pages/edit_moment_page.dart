@@ -79,10 +79,7 @@ class _EditMomentPageState extends ConsumerState<EditMomentPage> {
                         child: Text("Routine"),
                       ),
                       DropdownMenuItem(value: 'meal', child: Text("Repas")),
-                      DropdownMenuItem(
-                        value: 'school',
-                        child: Text("Devoirs"),
-                      ),
+                      DropdownMenuItem(value: 'school', child: Text("Devoirs")),
                       DropdownMenuItem(
                         value: 'leisure',
                         child: Text("Temps libre"),
@@ -152,10 +149,13 @@ class _EditMomentPageState extends ConsumerState<EditMomentPage> {
                         value: 'momentMorning',
                         child: Text("Matin"),
                       ),
-                      DropdownMenuItem(value: 'momentMeal', child: Text("Repas")),
+                      DropdownMenuItem(
+                        value: 'momentMeal',
+                        child: Text("Repas"),
+                      ),
                       DropdownMenuItem(
                         value: 'momentSchool',
-                        child: Text("École"),
+                        child: Text("Devoirs"),
                       ),
                       DropdownMenuItem(
                         value: 'momentLeisure',
@@ -243,9 +243,9 @@ class _EditMomentPageState extends ConsumerState<EditMomentPage> {
     final name = _nameController.text.trim();
 
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Merci d'indiquer un nom.")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Merci d'indiquer un nom.")));
       return;
     }
 
@@ -267,9 +267,9 @@ class _EditMomentPageState extends ConsumerState<EditMomentPage> {
     final updateState = ref.read(momentUpdateProvider);
 
     if (updateState.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(updateState.error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(updateState.error.toString())));
       return;
     }
 

@@ -60,6 +60,8 @@ class FamilyRepository {
 
     await _firestoreService.createUserIndex(uid: user.uid, familyId: familyId);
 
+    await _getOrCreateFamilyPlanning(familyId: familyId);
+
     return SessionModel(
       userId: user.uid,
       familyId: familyId,
@@ -134,19 +136,27 @@ class FamilyRepository {
   }
 
   // ---------------------------------------------------------------------------
-  // Journées Types
+  // Planning familial
   // ---------------------------------------------------------------------------
 
-  Future<void> createDayType(DayTypeModel dayType) {
-    return _firestoreService.createDayType(dayType);
+  Future<void> createFamilyPlanning(DayTypeModel planning) {
+    return _firestoreService.createDayType(planning);
   }
 
-  Future<List<DayTypeModel>> getDayTypes({required String familyId}) {
+  Future<List<DayTypeModel>> getFamilyPlannings({required String familyId}) {
     return _firestoreService.getDayTypes(familyId: familyId);
   }
 
+  Future<void> createDayType(DayTypeModel dayType) {
+    return createFamilyPlanning(dayType);
+  }
+
+  Future<List<DayTypeModel>> getDayTypes({required String familyId}) {
+    return getFamilyPlannings(familyId: familyId);
+  }
+
   // ---------------------------------------------------------------------------
-  // Exceptions de journées
+  // Exceptions de planning
   // ---------------------------------------------------------------------------
 
   Future<List<DayExceptionModel>> getDayExceptions({required String familyId}) {
@@ -166,7 +176,7 @@ class FamilyRepository {
   Future<void> saveDayException({
     required String familyId,
     required DateTime date,
-    required String dayTypeId,
+    required String familyPlanningId,
     required List<String> momentIds,
   }) async {
     final existingException = await getDayExceptionForDate(
@@ -180,7 +190,7 @@ class FamilyRepository {
         id: _firestoreService.generateDayExceptionId(familyId),
         familyId: familyId,
         dateKey: _dateKey(date),
-        dayTypeId: dayTypeId,
+        dayTypeId: familyPlanningId,
         momentIds: momentIds,
         active: true,
         createdAt: now,
@@ -192,7 +202,7 @@ class FamilyRepository {
 
     return _firestoreService.updateDayException(
       existingException.copyWith(
-        dayTypeId: dayTypeId,
+        familyPlanningId: familyPlanningId,
         momentIds: momentIds,
         active: true,
         updatedAt: now,
@@ -215,8 +225,8 @@ class FamilyRepository {
     required String familyId,
     required String type,
   }) async {
-    final dayType = await _getOrCreateDefaultDayType(familyId: familyId);
-    final position = dayType.momentIds.length;
+    final planning = await _getOrCreateFamilyPlanning(familyId: familyId);
+    final position = planning.momentIds.length;
 
     final moment = _buildDefaultMoment(
       familyId: familyId,
@@ -227,22 +237,22 @@ class FamilyRepository {
     await _firestoreService.createMoment(familyId: familyId, moment: moment);
 
     await _firestoreService.updateDayType(
-      dayType.copyWith(momentIds: [...dayType.momentIds, moment.id]),
+      planning.copyWith(momentIds: [...planning.momentIds, moment.id]),
     );
   }
 
   Future<List<MomentModel>> getMoments({required String familyId}) async {
-    final dayType = await _getOrCreateDefaultDayType(familyId: familyId);
+    final planning = await _getOrCreateFamilyPlanning(familyId: familyId);
     final moments = await _firestoreService.getMoments(familyId: familyId);
 
-    if (dayType.momentIds.isEmpty) {
+    if (planning.momentIds.isEmpty) {
       return moments;
     }
 
     final momentsById = {for (final moment in moments) moment.id: moment};
 
     return [
-      for (final momentId in dayType.momentIds)
+      for (final momentId in planning.momentIds)
         if (momentsById[momentId] != null) momentsById[momentId]!,
     ];
   }
@@ -258,7 +268,7 @@ class FamilyRepository {
     required String familyId,
     required MomentModel moment,
   }) async {
-    final dayType = await _getOrCreateDefaultDayType(familyId: familyId);
+    final planning = await _getOrCreateFamilyPlanning(familyId: familyId);
     final existingMoments = await getMoments(familyId: familyId);
     final insertionIndex = _nextIndexAfter(
       ids: existingMoments.map((existingMoment) => existingMoment.id).toList(),
@@ -317,7 +327,7 @@ class FamilyRepository {
         .toList();
 
     await _firestoreService.updateDayType(
-      dayType.copyWith(momentIds: reorderedMomentIds),
+      planning.copyWith(momentIds: reorderedMomentIds),
     );
   }
 
@@ -335,10 +345,10 @@ class FamilyRepository {
       positionsByMomentId: positionsByMomentId,
     );
 
-    final dayType = await _getOrCreateDefaultDayType(familyId: familyId);
+    final planning = await _getOrCreateFamilyPlanning(familyId: familyId);
 
     await _firestoreService.updateDayType(
-      dayType.copyWith(momentIds: moments.map((moment) => moment.id).toList()),
+      planning.copyWith(momentIds: moments.map((moment) => moment.id).toList()),
     );
   }
 
@@ -351,13 +361,13 @@ class FamilyRepository {
       momentId: momentId,
     );
 
-    final dayType = await _getOrCreateDefaultDayType(familyId: familyId);
-    final momentIds = dayType.momentIds
+    final planning = await _getOrCreateFamilyPlanning(familyId: familyId);
+    final momentIds = planning.momentIds
         .where((existingMomentId) => existingMomentId != momentId)
         .toList();
 
     await _firestoreService.updateDayType(
-      dayType.copyWith(momentIds: momentIds),
+      planning.copyWith(momentIds: momentIds),
     );
   }
 
@@ -484,31 +494,52 @@ class FamilyRepository {
     );
   }
 
-  Future<DayTypeModel> _getOrCreateDefaultDayType({
+  Future<DayTypeModel> _getOrCreateFamilyPlanning({
     required String familyId,
   }) async {
-    final existingDayType = await _firestoreService.getDayTypeByType(
+    final existingPlanning = await _firestoreService.getDayTypeByType(
+      familyId: familyId,
+      type: 'family_planning',
+    );
+
+    if (existingPlanning != null) {
+      return existingPlanning;
+    }
+
+    final legacyPlanning = await _firestoreService.getDayTypeByType(
       familyId: familyId,
       type: 'default',
     );
 
-    if (existingDayType != null) {
-      return existingDayType;
+    if (legacyPlanning != null) {
+      return legacyPlanning;
     }
 
-    final dayType = DayTypeModel(
+    final planning = DayTypeModel(
       id: _firestoreService.generateDayTypeId(familyId),
       familyId: familyId,
-      name: 'Journée',
-      type: 'default',
+      name: 'Planning familial',
+      type: 'family_planning',
       order: 0,
       momentIds: const [],
       active: true,
     );
 
-    await _firestoreService.createDayType(dayType);
+    await _firestoreService.createDayType(planning);
 
-    return dayType;
+    final moments = _buildDefaultFamilyPlanningMoments(familyId: familyId);
+
+    for (final moment in moments) {
+      await _firestoreService.createMoment(familyId: familyId, moment: moment);
+    }
+
+    final planningWithMoments = planning.copyWith(
+      momentIds: moments.map((moment) => moment.id).toList(),
+    );
+
+    await _firestoreService.updateDayType(planningWithMoments);
+
+    return planningWithMoments;
   }
 
   // ---------------------------------------------------------------------------
@@ -706,6 +737,90 @@ class FamilyRepository {
     final day = date.day.toString().padLeft(2, '0');
 
     return '$year-$month-$day';
+  }
+
+  List<MomentModel> _buildDefaultFamilyPlanningMoments({
+    required String familyId,
+  }) {
+    return [
+      _buildFamilyPlanningMoment(
+        familyId: familyId,
+        name: 'Routine du matin',
+        type: 'routine',
+        iconKey: 'routineMorning',
+        colorKey: 'momentMorning',
+        position: 0,
+        hasRoutine: true,
+      ),
+      _buildFamilyPlanningMoment(
+        familyId: familyId,
+        name: 'Tâches du quotidien',
+        type: 'household',
+        iconKey: 'householdTasks',
+        colorKey: 'momentHygiene',
+        position: 1,
+        hasRoutine: false,
+      ),
+      _buildFamilyPlanningMoment(
+        familyId: familyId,
+        name: 'Repas',
+        type: 'meal',
+        iconKey: 'meal',
+        colorKey: 'momentMeal',
+        position: 2,
+        hasRoutine: false,
+      ),
+      _buildFamilyPlanningMoment(
+        familyId: familyId,
+        name: 'Temps libre',
+        type: 'leisure',
+        iconKey: 'freeTime',
+        colorKey: 'momentLeisure',
+        position: 3,
+        hasRoutine: false,
+      ),
+      _buildFamilyPlanningMoment(
+        familyId: familyId,
+        name: 'Repas',
+        type: 'meal',
+        iconKey: 'meal',
+        colorKey: 'momentMeal',
+        position: 4,
+        hasRoutine: false,
+      ),
+      _buildFamilyPlanningMoment(
+        familyId: familyId,
+        name: 'Routine du soir',
+        type: 'routine',
+        iconKey: 'routineEvening',
+        colorKey: 'momentEvening',
+        position: 5,
+        hasRoutine: true,
+      ),
+    ];
+  }
+
+  MomentModel _buildFamilyPlanningMoment({
+    required String familyId,
+    required String name,
+    required String type,
+    required String iconKey,
+    required String colorKey,
+    required int position,
+    required bool hasRoutine,
+  }) {
+    return MomentModel(
+      id: _firestoreService.generateMomentId(familyId),
+      familyId: familyId,
+      name: name,
+      type: type,
+      iconKey: iconKey,
+      colorKey: colorKey,
+      position: position,
+      hasRoutine: hasRoutine,
+      active: true,
+      createdAt: DateTime.now(),
+    );
   }
 
   MomentModel _buildDefaultMoment({

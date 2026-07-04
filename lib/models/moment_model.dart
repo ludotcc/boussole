@@ -19,7 +19,7 @@ class MomentModel {
   /// Exemples : momentMorning, momentMeal...
   final String colorKey;
 
-  /// Position dans la journée.
+  /// Position dans le planning familial.
   final int position;
 
   /// Ce moment ouvre une routine.

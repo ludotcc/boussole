@@ -20,7 +20,7 @@ class DayPlannerPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const BoussoleAppBar(title: "Organisation de la journée"),
+      appBar: const BoussoleAppBar(title: "Planning familial"),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(24),
@@ -42,7 +42,7 @@ class DayPlannerPage extends ConsumerWidget {
                     icon: Icons.calendar_today_rounded,
                     title: "Aucun moment",
                     message:
-                        "Ajoutez un premier moment pour organiser la journée.",
+                        "Ajoutez un premier moment pour préparer le planning.",
                   );
                 }
 
@@ -66,65 +66,78 @@ class DayPlannerPage extends ConsumerWidget {
                     return Padding(
                       key: ValueKey(moment.id),
                       padding: const EdgeInsets.only(bottom: 16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: MomentCard(
-                              title: moment.name,
-                              subtitle: _momentSubtitle(moment),
-                              image: _momentImage(moment.iconKey),
-                              color: _momentColor(moment.colorKey),
-                              onTap: () {
-                                context.push('/edit-moment', extra: moment);
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Material(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            child: IconButton(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final useCompactActions = constraints.maxWidth < 360;
+                          final actions = [
+                            _MomentActionButton(
                               tooltip: "Routine",
-                              icon: const Icon(
-                                Icons.checklist_rounded,
-                                color: AppColors.primary,
-                              ),
+                              icon: Icons.checklist_rounded,
+                              color: AppColors.primary,
                               onPressed: () {
                                 context.push('/moment-routines', extra: moment);
                               },
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          Material(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            child: IconButton(
+                            _MomentActionButton(
                               tooltip: "Dupliquer",
-                              icon: const Icon(
-                                Icons.copy_rounded,
-                                color: AppColors.primary,
-                              ),
+                              icon: Icons.copy_rounded,
+                              color: AppColors.primary,
                               onPressed: () {
                                 _duplicateMoment(context, ref, moment);
                               },
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          Material(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            child: IconButton(
+                            _MomentActionButton(
                               tooltip: "Supprimer",
-                              icon: const Icon(
-                                Icons.delete_outline_rounded,
-                                color: AppColors.error,
-                              ),
+                              icon: Icons.delete_outline_rounded,
+                              color: AppColors.error,
                               onPressed: () {
                                 _confirmDeleteMoment(context, ref, moment);
                               },
                             ),
-                          ),
-                        ],
+                          ];
+
+                          return Row(
+                            crossAxisAlignment: useCompactActions
+                                ? CrossAxisAlignment.start
+                                : CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: MomentCard(
+                                  title: moment.name,
+                                  subtitle: _momentSubtitle(moment),
+                                  image: _momentImage(moment.iconKey),
+                                  color: _momentColor(moment.colorKey),
+                                  onTap: () {
+                                    context.push('/edit-moment', extra: moment);
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              if (useCompactActions)
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    actions[0],
+                                    const SizedBox(height: 10),
+                                    actions[1],
+                                    const SizedBox(height: 10),
+                                    actions[2],
+                                  ],
+                                )
+                              else
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    actions[0],
+                                    const SizedBox(width: 10),
+                                    actions[1],
+                                    const SizedBox(width: 10),
+                                    actions[2],
+                                  ],
+                                ),
+                            ],
+                          );
+                        },
                       ),
                     );
                   },
@@ -176,6 +189,37 @@ class DayPlannerPage extends ConsumerWidget {
 
             const SizedBox(height: 40),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MomentActionButton extends StatelessWidget {
+  const _MomentActionButton({
+    required this.tooltip,
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: IconButton(
+          tooltip: tooltip,
+          icon: Icon(icon, color: color),
+          onPressed: onPressed,
         ),
       ),
     );
@@ -281,8 +325,12 @@ String _momentImage(String iconKey) {
       return AppAssets.meal;
     case 'homework':
       return AppAssets.homework;
+    case 'householdTasks':
+      return AppAssets.householdTasks;
     case 'videoGames':
       return AppAssets.videoGames;
+    case 'freeTime':
+      return AppAssets.freeTime;
     case 'bike':
       return AppAssets.bike;
     case 'bath':
