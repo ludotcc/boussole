@@ -74,7 +74,9 @@ class RoutineStepsPage extends ConsumerWidget {
 
                         reorderedSteps.insert(newIndex, movedStep);
 
-                        ref.read(stepOrderProvider.notifier).reorderSteps(
+                        ref
+                            .read(stepOrderProvider.notifier)
+                            .reorderSteps(
                               routine: routine,
                               steps: reorderedSteps,
                             );
@@ -107,11 +109,8 @@ class RoutineStepsPage extends ConsumerWidget {
                                 IconButton(
                                   tooltip: "Modifier",
                                   icon: const Icon(Icons.edit_rounded),
-                                  onPressed: () => _showStepDialog(
-                                    context,
-                                    ref,
-                                    step: step,
-                                  ),
+                                  onPressed: () =>
+                                      _showStepDialog(context, ref, step: step),
                                 ),
                                 IconButton(
                                   tooltip: "Supprimer",
@@ -119,11 +118,8 @@ class RoutineStepsPage extends ConsumerWidget {
                                     Icons.delete_outline_rounded,
                                     color: AppColors.error,
                                   ),
-                                  onPressed: () => _confirmDeleteStep(
-                                    context,
-                                    ref,
-                                    step,
-                                  ),
+                                  onPressed: () =>
+                                      _confirmDeleteStep(context, ref, step),
                                 ),
                               ],
                             ),
@@ -168,7 +164,9 @@ class RoutineStepsPage extends ConsumerWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text(step == null ? "Ajouter une étape" : "Modifier l'étape"),
+              title: Text(
+                step == null ? "Ajouter une étape" : "Modifier l'étape",
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -198,7 +196,10 @@ class RoutineStepsPage extends ConsumerWidget {
                       items: const [
                         DropdownMenuItem(value: 'check', child: Text("Étape")),
                         DropdownMenuItem(value: 'bath', child: Text("Bain")),
-                        DropdownMenuItem(value: 'meal', child: Text("Repas")),
+                        DropdownMenuItem(
+                          value: 'breakfast',
+                          child: Text("breakfast"),
+                        ),
                         DropdownMenuItem(
                           value: 'homework',
                           child: Text("Devoirs"),
@@ -266,14 +267,18 @@ class RoutineStepsPage extends ConsumerWidget {
     }
 
     if (step == null) {
-      await ref.read(stepCreationProvider.notifier).createStep(
+      await ref
+          .read(stepCreationProvider.notifier)
+          .createStep(
             routine: routine,
             title: result.title,
             description: result.description,
             icon: result.icon,
           );
     } else {
-      await ref.read(stepUpdateProvider.notifier).updateStep(
+      await ref
+          .read(stepUpdateProvider.notifier)
+          .updateStep(
             routine: routine,
             step: step.copyWith(
               title: result.title,
@@ -293,9 +298,9 @@ class RoutineStepsPage extends ConsumerWidget {
         : ref.read(stepUpdateProvider);
 
     if (actionState.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(actionState.error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(actionState.error.toString())));
     }
   }
 
@@ -309,7 +314,9 @@ class RoutineStepsPage extends ConsumerWidget {
       builder: (context) {
         return AlertDialog(
           title: const Text("Supprimer cette étape ?"),
-          content: Text("L'étape \"${step.title}\" sera retirée de la routine."),
+          content: Text(
+            "L'étape \"${step.title}\" sera retirée de la routine.",
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -328,10 +335,9 @@ class RoutineStepsPage extends ConsumerWidget {
       return;
     }
 
-    await ref.read(stepDeletionProvider.notifier).deleteStep(
-          routine: routine,
-          stepId: step.id,
-        );
+    await ref
+        .read(stepDeletionProvider.notifier)
+        .deleteStep(routine: routine, stepId: step.id);
 
     if (!context.mounted) {
       return;
@@ -340,9 +346,9 @@ class RoutineStepsPage extends ConsumerWidget {
     final deletionState = ref.read(stepDeletionProvider);
 
     if (deletionState.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(deletionState.error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(deletionState.error.toString())));
     }
   }
 }

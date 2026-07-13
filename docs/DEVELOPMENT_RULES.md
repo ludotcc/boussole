@@ -1,81 +1,139 @@
 # DEVELOPMENT_RULES.md
-
-## Philosophie
-
-Le but est de développer Boussole le plus rapidement possible sans sacrifier la qualité.
-
-Le GPT est considéré comme un membre de l'équipe de développement.
+# Règles officielles de développement
+Version : 2.0
+Dernière mise à jour : 13 juillet 2026
 
 ---
 
-## Communication
+# Objectif
 
-- Aller directement à l'action.
-- Ne jamais faire de longs discours.
-- Ne jamais expliquer le pourquoi ou le comment sauf si une décision importante doit être prise.
-- Une seule étape à la fois.
-- Si une action utilisateur est nécessaire, attendre sa validation avant de continuer.
+Ces règles garantissent la cohérence, la qualité et la maintenabilité du projet Boussole.
+
+Chaque développement doit respecter la vision produit avant toute considération technique.
 
 ---
 
-## Code
+# Méthode de travail
 
-Toujours fournir :
+Avant toute modification :
 
-- le fichier complet
-- les imports
-- le nom du fichier
-- où le placer
-
-Jamais de pseudo-code.
-
-Jamais de code incomplet.
+1. Lire la demande.
+2. Consulter la documentation concernée.
+3. Réutiliser le code existant.
+4. Limiter le périmètre des modifications.
+5. Préserver les fonctionnalités existantes.
 
 ---
 
-## Architecture
+# Architecture
 
-Toujours respecter :
+Architecture officielle :
 
-- AGENTS.md
-- PROJECT_CONTEXT.md
-- Design System
-- Architecture Flutter existante
+Page
 
----
+↓
 
-## VS Code
+Widget
 
-Considérer que le développement se fait principalement dans VS Code.
+↓
 
-Toujours analyser les fichiers existants avant d'écrire du nouveau code.
+Provider Riverpod
 
-Modifier les fichiers existants plutôt que d'en créer de nouveaux lorsque c'est pertinent.
+↓
 
----
+Repository
 
-## Priorités
+↓
 
-1. Robustesse
-2. Lisibilité
-3. Réutilisation
-4. Performance
-5. Évolutivité
+Service
 
----
+↓
 
-## Interdictions
+Firebase / Firestore
 
-Ne jamais casser une fonctionnalité existante.
-
-Ne jamais modifier une décision déjà validée.
-
-Ne jamais changer le design sans validation.
-
-Ne jamais proposer des améliorations hors sujet pendant un développement.
+Aucun accès direct à Firestore depuis une page ou un widget.
 
 ---
 
-## Mission
+# Principes de développement
 
-Faire avancer Boussole jusqu'à une application professionnelle prête pour Android et iOS.
+Toujours privilégier :
+
+- simplicité ;
+- lisibilité ;
+- réutilisation ;
+- performances ;
+- évolutivité.
+
+Ne jamais créer une nouvelle architecture lorsqu'une architecture existe déjà.
+
+---
+
+# Code
+
+- fichiers en snake_case ;
+- classes en PascalCase ;
+- variables en camelCase ;
+- imports propres ;
+- widgets réutilisables ;
+- commentaires uniquement lorsqu'ils apportent une réelle valeur.
+
+---
+
+# Documentation
+
+Toute fonctionnalité importante doit être documentée.
+
+Le Sprint 15 possède sa propre documentation de référence.
+
+En cas de conflit, les documents du Sprint 15 priment sur une ancienne documentation fonctionnelle.
+
+---
+
+# Qualité
+
+Après une modification Dart :
+
+- lancer `dart format` sur les fichiers modifiés ;
+- lancer `flutter analyze` lorsque plusieurs couches sont impactées ;
+- exécuter les tests existants si disponibles ;
+- vérifier les parcours modifiés.
+
+---
+
+# Dépendances
+
+Aucune dépendance ne doit être ajoutée ou supprimée sans validation.
+
+Éviter toute dette technique inutile.
+
+---
+
+# Interface
+
+Respecter :
+
+- le thème officiel ;
+- les composants existants ;
+- l'identité graphique de Boussole.
+
+L'espace enfant et l'espace parent doivent conserver des expériences distinctes.
+
+---
+
+# Philosophie
+
+Chaque développement doit renforcer au moins un de ces objectifs :
+
+- favoriser l'autonomie ;
+- réduire la charge mentale des parents ;
+- créer des souvenirs familiaux ;
+- renforcer la relation entre l'enfant et son Gardien.
+
+Si une fonctionnalité ne répond à aucun de ces objectifs, elle doit être repensée.
+
+---
+
+# Vision finale
+
+Le code doit rester suffisamment propre pour permettre au projet d'évoluer pendant plusieurs années sans remettre en cause ses fondations.

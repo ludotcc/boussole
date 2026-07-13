@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../models/child_model.dart';
+import '../../models/school_academy.dart';
 
 class ChildFirestoreService {
   ChildFirestoreService({FirebaseFirestore? firestore})
@@ -28,6 +29,12 @@ class ChildFirestoreService {
           'firstName': child.firstName,
           'avatar': child.avatar,
           'age': child.age,
+          'profileType': child.profileType,
+          'academyId': child.academyId,
+          'weeklyRhythmByWeekday': {
+            for (final entry in child.weeklyRhythmByWeekday.entries)
+              entry.key.toString(): entry.value,
+          },
           'createdAt': Timestamp.fromDate(child.createdAt),
         });
   }
@@ -49,6 +56,11 @@ class ChildFirestoreService {
         firstName: data['firstName'] as String,
         avatar: data['avatar'] as String,
         age: data['age'] as int,
+        profileType: data['profileType'] as String? ?? 'child',
+        academyId: data['academyId'] as String? ?? defaultSchoolAcademyId,
+        weeklyRhythmByWeekday: ChildModel.weeklyRhythmFromMap(
+          data['weeklyRhythmByWeekday'] as Map?,
+        ),
         createdAt: (data['createdAt'] as Timestamp).toDate(),
       );
     }).toList();

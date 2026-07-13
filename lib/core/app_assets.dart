@@ -11,13 +11,14 @@ class AppAssets {
   // Icône application
   // ---------------------------------------------------------------------------
 
-  static const String icon = 'assets/images/icon.png';
+  static const String icon = 'assets/images/logo/logo.png';
 
   // ---------------------------------------------------------------------------
   // Illustrations
   // ---------------------------------------------------------------------------
 
-  static const String welcome = 'assets/images/welcome.png';
+  static const String welcome =
+      'assets/images/backgrounds/background_accueil.png';
 
   // ---------------------------------------------------------------------------
   // Avatars
@@ -52,6 +53,18 @@ class AppAssets {
   // Arrière-plans
   // ---------------------------------------------------------------------------
 
+  static const String backgroundBase =
+      'assets/images/backgrounds/background_base.png';
+
+  static const String backgroundBase01 =
+      'assets/images/backgrounds/background_base01.png';
+
+  static const String backgroundBase02 =
+      'assets/images/backgrounds/background_base02.png';
+
+  static const String backgroundBase03 =
+      'assets/images/backgrounds/background_base03.png';
+
   static const String backgroundSky =
       'assets/images/backgrounds/background_ciel.png';
 
@@ -84,14 +97,36 @@ class AppAssets {
 
   static const String breakfast = 'assets/images/objects/breakfast.png';
 
+  static const String familyCare = 'assets/images/objects/baby_sitting.png';
+
+  static const String brushTeeth = 'assets/images/objects/brossage_dents.png';
+
+  static const String shopping = 'assets/images/objects/course.png';
+
+  static const String lunch = 'assets/images/objects/dejeuner.png';
+
+  static const String dinner = 'assets/images/objects/diner.png';
+
+  static const String divers = 'assets/images/objects/divers.png';
+
+  static const String medication = 'assets/images/objects/medicaments.png';
+
+  static const String swimming = 'assets/images/objects/piscine.png';
+
+  static const String screenTime = 'assets/images/objects/video_time.png';
+
+  static const String wakeUp = 'assets/images/objects/Bonjour.png';
+
+  static const String sleep = 'assets/images/objects/Bonne_nuit.png';
+
+  static const String nap = 'assets/images/objects/sieste.png';
+
   static const String cap = 'assets/images/objects/cap.png';
 
   static const String homework = 'assets/images/objects/homework.png';
 
   static const String householdTasks =
       'assets/images/objects/household_tasks.png';
-
-  static const String meal = 'assets/images/objects/meal.png';
 
   static const String pants = 'assets/images/objects/pants.png';
 

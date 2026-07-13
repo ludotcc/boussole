@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/child_model.dart';
+import '../models/child_day_progress_model.dart';
 import '../models/day_exception_model.dart';
 import '../models/day_type_model.dart';
+import '../models/family_event_model.dart';
 import '../models/family_model.dart';
 import '../models/parent_model.dart';
 import '../models/moment_model.dart';
 import '../models/routine_model.dart';
+import '../models/school_academy.dart';
 import '../models/step_model.dart';
 
 class FirestoreService {
@@ -26,6 +29,39 @@ class FirestoreService {
     return doc.id;
   }
 
+  Future<FamilyModel?> getFamily({required String familyId}) async {
+    final doc = await _firestore.collection('families').doc(familyId).get();
+
+    if (!doc.exists) {
+      return null;
+    }
+
+    final data = doc.data();
+    final info = data?['info'] as Map<String, dynamic>?;
+
+    if (info == null) {
+      return null;
+    }
+
+    final createdAt = info['createdAt'];
+
+    return FamilyModel(
+      id: doc.id,
+      name: info['name'] as String? ?? '',
+      createdBy: info['ownerUid'] as String? ?? '',
+      createdAt: createdAt is Timestamp ? createdAt.toDate() : DateTime.now(),
+    );
+  }
+
+  Future<void> updateFamilyName({
+    required String familyId,
+    required String name,
+  }) async {
+    await _firestore.collection('families').doc(familyId).update({
+      'info.name': name,
+    });
+  }
+
   Future<void> createParent(ParentModel parent) async {
     await _firestore
         .collection('families')
@@ -37,9 +73,45 @@ class FirestoreService {
           'firstName': parent.firstName,
           'email': parent.email,
           'avatar': parent.avatar,
+          'age': parent.age,
+          'profileType': parent.profileType,
           'createdAt': Timestamp.fromDate(parent.createdAt),
           'role': 'parent',
         });
+  }
+
+  Future<List<ParentModel>> getAdultProfiles({required String familyId}) async {
+    final snapshot = await _firestore
+        .collection('families')
+        .doc(familyId)
+        .collection('members')
+        .orderBy('createdAt')
+        .get();
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+
+      return ParentModel(
+        uid: data['uid'] as String? ?? doc.id,
+        familyId: familyId,
+        firstName: data['firstName'] as String? ?? '',
+        email: data['email'] as String? ?? '',
+        avatar: data['avatar'] as String? ?? '',
+        age: data['age'] as int?,
+        profileType: data['profileType'] as String? ?? 'parent',
+        createdAt:
+            (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      );
+    }).toList();
+  }
+
+  String generateMemberId(String familyId) {
+    return _firestore
+        .collection('families')
+        .doc(familyId)
+        .collection('members')
+        .doc()
+        .id;
   }
 
   Future<void> updateParentAvatar({
@@ -53,6 +125,32 @@ class FirestoreService {
         .collection('members')
         .doc(parentId)
         .update({'avatar': avatarId});
+  }
+
+  Future<void> updateParent(ParentModel parent) async {
+    await _firestore
+        .collection('families')
+        .doc(parent.familyId)
+        .collection('members')
+        .doc(parent.uid)
+        .update({
+          'firstName': parent.firstName,
+          'avatar': parent.avatar,
+          'age': parent.age,
+          'profileType': parent.profileType,
+        });
+  }
+
+  Future<void> deleteParent({
+    required String familyId,
+    required String parentId,
+  }) async {
+    await _firestore
+        .collection('families')
+        .doc(familyId)
+        .collection('members')
+        .doc(parentId)
+        .delete();
   }
 
   String generateChildId(String familyId) {
@@ -75,8 +173,77 @@ class FirestoreService {
           'firstName': child.firstName,
           'avatar': child.avatar,
           'age': child.age,
+          'profileType': child.profileType,
+          'academyId': child.academyId,
+          'weeklyRhythmByWeekday': {
+            for (final entry in child.weeklyRhythmByWeekday.entries)
+              entry.key.toString(): entry.value,
+          },
           'createdAt': Timestamp.fromDate(child.createdAt),
         });
+  }
+
+  Future<ChildModel?> getChild({
+    required String familyId,
+    required String childId,
+  }) async {
+    final doc = await _firestore
+        .collection('families')
+        .doc(familyId)
+        .collection('children')
+        .doc(childId)
+        .get();
+
+    final data = doc.data();
+
+    if (data == null) {
+      return null;
+    }
+
+    return ChildModel(
+      id: data['id'] as String,
+      familyId: familyId,
+      firstName: data['firstName'] as String,
+      avatar: data['avatar'] as String,
+      age: data['age'] as int,
+      profileType: data['profileType'] as String? ?? 'child',
+      academyId: data['academyId'] as String? ?? defaultSchoolAcademyId,
+      weeklyRhythmByWeekday: ChildModel.weeklyRhythmFromMap(
+        data['weeklyRhythmByWeekday'] as Map?,
+      ),
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+    );
+  }
+
+  Future<void> updateChild(ChildModel child) async {
+    await _firestore
+        .collection('families')
+        .doc(child.familyId)
+        .collection('children')
+        .doc(child.id)
+        .update({
+          'firstName': child.firstName,
+          'avatar': child.avatar,
+          'age': child.age,
+          'profileType': child.profileType,
+          'academyId': child.academyId,
+          'weeklyRhythmByWeekday': {
+            for (final entry in child.weeklyRhythmByWeekday.entries)
+              entry.key.toString(): entry.value,
+          },
+        });
+  }
+
+  Future<void> deleteChild({
+    required String familyId,
+    required String childId,
+  }) async {
+    await _firestore
+        .collection('families')
+        .doc(familyId)
+        .collection('children')
+        .doc(childId)
+        .delete();
   }
 
   Future<List<ChildModel>> getChildren({required String familyId}) async {
@@ -96,9 +263,120 @@ class FirestoreService {
         firstName: data['firstName'] as String,
         avatar: data['avatar'] as String,
         age: data['age'] as int,
+        profileType: data['profileType'] as String? ?? 'child',
+        academyId: data['academyId'] as String? ?? defaultSchoolAcademyId,
+        weeklyRhythmByWeekday: ChildModel.weeklyRhythmFromMap(
+          data['weeklyRhythmByWeekday'] as Map?,
+        ),
         createdAt: (data['createdAt'] as Timestamp).toDate(),
       );
     }).toList();
+  }
+
+  Future<ChildDayProgressModel?> getChildDayProgress({
+    required String familyId,
+    required String childId,
+    required String dateKey,
+  }) async {
+    final doc = await _firestore
+        .collection('families')
+        .doc(familyId)
+        .collection('children')
+        .doc(childId)
+        .collection('day_progress')
+        .doc(dateKey)
+        .get();
+
+    if (!doc.exists) {
+      return null;
+    }
+
+    final data = doc.data();
+
+    if (data == null) {
+      return null;
+    }
+
+    return ChildDayProgressModel.fromMap(data);
+  }
+
+  Future<void> saveChildDayProgress({
+    required ChildDayProgressModel progress,
+  }) async {
+    await _firestore
+        .collection('families')
+        .doc(progress.familyId)
+        .collection('children')
+        .doc(progress.childId)
+        .collection('day_progress')
+        .doc(progress.dateKey)
+        .set(progress.toMap());
+  }
+
+  String generateEventId(String familyId) {
+    return _firestore
+        .collection('families')
+        .doc(familyId)
+        .collection('events')
+        .doc()
+        .id;
+  }
+
+  Future<void> createEvent(FamilyEventModel event) async {
+    await _firestore
+        .collection('families')
+        .doc(event.familyId)
+        .collection('events')
+        .doc(event.id)
+        .set(event.toMap());
+  }
+
+  Future<void> updateEvent(FamilyEventModel event) async {
+    await _firestore
+        .collection('families')
+        .doc(event.familyId)
+        .collection('events')
+        .doc(event.id)
+        .update(event.toMap());
+  }
+
+  Future<void> deleteEvent({
+    required String familyId,
+    required String eventId,
+  }) async {
+    await _firestore
+        .collection('families')
+        .doc(familyId)
+        .collection('events')
+        .doc(eventId)
+        .delete();
+  }
+
+  Future<List<FamilyEventModel>> getEvents({required String familyId}) async {
+    final snapshot = await _firestore
+        .collection('families')
+        .doc(familyId)
+        .collection('events')
+        .orderBy('date')
+        .get();
+
+    return snapshot.docs
+        .map((doc) => FamilyEventModel.fromMap(doc.data()))
+        .toList();
+  }
+
+  Stream<List<FamilyEventModel>> watchEvents({required String familyId}) {
+    return _firestore
+        .collection('families')
+        .doc(familyId)
+        .collection('events')
+        .orderBy('date')
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => FamilyEventModel.fromMap(doc.data()))
+              .toList(),
+        );
   }
 
   Future<ParentModel?> getParent({
@@ -122,8 +400,10 @@ class FirestoreService {
       uid: data['uid'] as String,
       familyId: familyId,
       firstName: data['firstName'] as String,
-      email: data['email'] as String,
-      avatar: data['avatar'] as String,
+      email: data['email'] as String? ?? '',
+      avatar: data['avatar'] as String? ?? '',
+      age: data['age'] as int?,
+      profileType: data['profileType'] as String? ?? 'parent',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
     );
   }
@@ -177,19 +457,6 @@ class FirestoreService {
         .collection('day_types')
         .doc(dayType.id)
         .set(dayType.toMap());
-  }
-
-  Future<List<DayTypeModel>> getDayTypes({required String familyId}) async {
-    final snapshot = await _firestore
-        .collection('families')
-        .doc(familyId)
-        .collection('day_types')
-        .orderBy('order')
-        .get();
-
-    return snapshot.docs.map((doc) {
-      return DayTypeModel.fromMap(doc.data());
-    }).toList();
   }
 
   Future<DayTypeModel?> getDayTypeByType({
@@ -251,38 +518,56 @@ class FirestoreService {
         .update(dayException.toMap());
   }
 
-  Future<List<DayExceptionModel>> getDayExceptions({
-    required String familyId,
-  }) async {
-    final snapshot = await _firestore
-        .collection('families')
-        .doc(familyId)
-        .collection('day_exceptions')
-        .orderBy('dateKey')
-        .get();
-
-    return snapshot.docs
-        .map((doc) => DayExceptionModel.fromMap(doc.data()))
-        .toList();
-  }
-
   Future<DayExceptionModel?> getDayExceptionByDate({
     required String familyId,
     required String dateKey,
+    String? childId,
   }) async {
+    if (childId != null) {
+      final document = await _firestore
+          .collection('families')
+          .doc(familyId)
+          .collection('day_exceptions')
+          .doc('${dateKey}_$childId')
+          .get();
+
+      if (!document.exists || document.data() == null) {
+        return null;
+      }
+
+      return DayExceptionModel.fromMap(document.data()!);
+    }
+
     final snapshot = await _firestore
         .collection('families')
         .doc(familyId)
         .collection('day_exceptions')
         .where('dateKey', isEqualTo: dateKey)
-        .limit(1)
         .get();
 
-    if (snapshot.docs.isEmpty) {
+    final matchingDocs = snapshot.docs.where((doc) {
+      final storedChildId = doc.data()['childId'] as String?;
+      return storedChildId == childId;
+    });
+
+    if (matchingDocs.isEmpty) {
       return null;
     }
 
-    return DayExceptionModel.fromMap(snapshot.docs.first.data());
+    return DayExceptionModel.fromMap(matchingDocs.first.data());
+  }
+
+  Future<void> deleteDayException({
+    required String familyId,
+    required String childId,
+    required String dateKey,
+  }) {
+    return _firestore
+        .collection('families')
+        .doc(familyId)
+        .collection('day_exceptions')
+        .doc('${dateKey}_$childId')
+        .delete();
   }
 
   // ---------------------------------------------------------------------------

@@ -35,4 +35,24 @@ class AuthService {
   Future<void> signOut() async {
     await _auth.signOut();
   }
+
+  Future<void> updateEmail(String email) async {
+    final user = currentUser;
+
+    if (user == null) {
+      throw Exception("Session introuvable.");
+    }
+
+    await user.verifyBeforeUpdateEmail(email.trim());
+  }
+
+  Future<void> updatePassword(String password) async {
+    final user = currentUser;
+
+    if (user == null) {
+      throw Exception("Session introuvable.");
+    }
+
+    await user.updatePassword(password);
+  }
 }

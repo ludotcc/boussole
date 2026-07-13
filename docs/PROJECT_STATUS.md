@@ -1,91 +1,114 @@
 # PROJECT_STATUS.md
+# État officiel du projet Boussole
+Version : 2.0
+Dernière mise à jour : 13 juillet 2026
 
-## Projet
+---
 
-Boussole
+# État général
 
-## État actuel
+🟢 Le développement fonctionnel de la V1 est largement avancé.
 
-Le projet est en développement actif sous Flutter.
+La publication est volontairement reportée.
 
-## Sprint actuel
+La priorité est désormais de construire l'expérience enfant complète avant la phase de sécurisation et de publication.
 
-Sprint 10.5
+---
 
-## Objectif du Sprint 10.5
+# Sprint actuel
 
-Aligner l’architecture dynamique sur un planning familial unique et personnalisable.
+## Sprint 15 — Les Gardiens des Repères
 
-## Fonctionnalités déjà fonctionnelles
+Objectif :
 
-- Initialisation Firebase
-- Navigation GoRouter
-- Thème Boussole
-- Splash screen
-- Écran bienvenue
-- Création de famille
-- Connexion parent
-- Sélection avatar parent
-- Création enfant
-- Sélection avatar enfant
-- Dashboard parent
-- Chargement des enfants
-- Déconnexion
-- Base Firestore familles / membres / enfants
-- Premiers modèles planning familial / moments / routines / étapes
+Transformer Boussole d'une application de routines en un compagnon numérique pour les enfants.
 
-## Fonctionnalités en cours
+---
 
-- Planning familial dynamique
-- Moments dynamiques
-- Routines liées aux moments
-- Préparation de l’écran enfant “Aujourd’hui”
+# Sous-sprints
 
-## Prochaine priorité
+## Sprint 15.1
+- Modes d'appareil
+- PIN parent
+- Navigation enfant
+- Maison comme nouvel accueil
 
-Stabiliser le planning familial et préparer les prochaines évolutions sans casser le dashboard existant.
+## Sprint 15.2
+- Les Gardiens
+- Personnalités
+- Cycle de vie
+- Changement libre de Gardien
 
-## Architecture active
+## Sprint 15.3
+- Les Éclats
+- Les Trouvailles
+- Progression de la Maison
 
-Page  
-↓  
-Widget  
-↓  
-Provider Riverpod  
-↓  
-Repository  
-↓  
-Service  
-↓  
-Firebase / Firestore
+## Sprint 15.4
+- Moteur des Repères
+- Deux propositions intelligentes
+- Personnalisation selon l'enfant
 
-## Règles importantes
+## Sprint 15.5
+- Missions Secrètes
+- Validation parentale
+- Moments partagés
 
-- Ne jamais mettre de logique métier dans les pages.
-- Ne jamais accéder directement à Firestore depuis l’UI.
-- Toujours passer par Provider → Repository → Service.
-- Toujours réutiliser les composants existants.
-- Ne pas refaire l’architecture sans validation.
-- Avancer une étape à la fois.
+---
 
-## Dernière décision importante
+# Fonctionnalités validées
 
-Un seul GPT dédié est utilisé pour le moment :  
-**Boussole – Architecte & Développeur Flutter**
+✅ Famille
 
-## Environnement de développement
+✅ Gestion des membres
 
-- Windows
-- VS Code
-- Extension officielle ChatGPT / Codex
-- Flutter
-- Firebase
-- GitHub
+✅ Journées enfant
 
-## À ne pas oublier
+✅ Agenda familial
 
-L’utilisateur veut avancer rapidement.
+✅ Espace personnel parent
 
-Les réponses doivent être courtes, concrètes, orientées action.
+✅ Routines
 
-Ne pas expliquer le pourquoi/comment sauf décision importante ou impact technique majeur.
+✅ Progression quotidienne
+
+---
+
+# Conception validée
+
+✅ Les Gardiens des Repères
+
+✅ La Maison
+
+✅ Les Éclats
+
+✅ Les Missions Secrètes
+
+✅ Le Moteur des Repères
+
+✅ Les modes d'appareil
+
+---
+
+# Publication
+
+La publication Android et iOS est volontairement reportée.
+
+Les travaux suivants seront réalisés après les tests familiaux :
+
+- règles Firestore
+- protection des routes
+- configuration Android
+- configuration iOS
+- tests automatisés
+- validation finale
+
+---
+
+# Vision
+
+Le prochain objectif n'est plus d'ajouter des fonctionnalités.
+
+Le prochain objectif est de créer une expérience enfant exceptionnelle.
+
+Le Sprint 15 constitue désormais la nouvelle fondation de Boussole.

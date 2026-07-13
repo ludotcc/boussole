@@ -13,11 +13,11 @@ class WelcomeMessage extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: width * 0.03),
       padding: const EdgeInsets.symmetric(horizontal: 23, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.96),
+        color: Colors.white.withValues(alpha: .96),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.08),
+            color: Colors.black.withValues(alpha: .08),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),

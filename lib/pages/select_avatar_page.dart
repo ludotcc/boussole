@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/constants/avatar_constants.dart';
 import '../providers/family_provider.dart';
 import '../providers/session_provider.dart';
 import '../widgets/avatar/avatar_grid.dart';
@@ -21,7 +22,7 @@ class _SelectAvatarPageState extends ConsumerState<SelectAvatarPage> {
   String? _selectedAvatar;
   bool _isLoading = false;
 
-  Future<void> _continue() async {
+  Future<void> _continue({String nextRoute = '/home'}) async {
     if (_selectedAvatar == null) return;
 
     final session = ref.read(sessionProvider);
@@ -51,11 +52,11 @@ class _SelectAvatarPageState extends ConsumerState<SelectAvatarPage> {
 
         if (!mounted) return;
 
-        context.go('/create-child');
+        context.go(nextRoute);
       } else {
         if (!mounted) return;
 
-        context.go('/home');
+        context.go(nextRoute);
       }
     } catch (e) {
       if (!mounted) return;
@@ -113,6 +114,9 @@ class _SelectAvatarPageState extends ConsumerState<SelectAvatarPage> {
                     child: SingleChildScrollView(
                       child: AvatarGrid(
                         selectedAvatarId: _selectedAvatar,
+                        avatars: widget.isParent
+                            ? AvatarConstants.adultAvatars
+                            : AvatarConstants.avatars,
                         onAvatarSelected: (avatarId) {
                           setState(() {
                             _selectedAvatar = avatarId;
@@ -126,10 +130,42 @@ class _SelectAvatarPageState extends ConsumerState<SelectAvatarPage> {
 
                   _isLoading
                       ? const Center(child: CircularProgressIndicator())
+                      : widget.isParent
+                      ? Column(
+                          children: [
+                            BoussoleButton(
+                              text: "Ajouter un autre adulte",
+                              icon: Icons.add_rounded,
+                              onPressed: _selectedAvatar == null
+                                  ? null
+                                  : () => _continue(nextRoute: '/create-adult'),
+                            ),
+                            const SizedBox(height: 14),
+                            BoussoleButton(
+                              text: "Ajouter un enfant",
+                              icon: Icons.child_care_rounded,
+                              isPrimary: false,
+                              onPressed: _selectedAvatar == null
+                                  ? null
+                                  : () => _continue(nextRoute: '/create-child'),
+                            ),
+                            const SizedBox(height: 14),
+                            BoussoleButton(
+                              text: "Terminer la famille",
+                              icon: Icons.check_rounded,
+                              isPrimary: false,
+                              onPressed: _selectedAvatar == null
+                                  ? null
+                                  : () => _continue(nextRoute: '/home'),
+                            ),
+                          ],
+                        )
                       : BoussoleButton(
                           text: "Continuer",
                           icon: Icons.arrow_forward,
-                          onPressed: _selectedAvatar == null ? null : _continue,
+                          onPressed: _selectedAvatar == null
+                              ? null
+                              : () => _continue(),
                         ),
                 ],
               ),

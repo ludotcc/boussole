@@ -59,7 +59,7 @@ class _BoussoleButtonState extends State<BoussoleButton> {
                   : Border.all(color: const Color(0xFFD7E6FF), width: 2),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.10),
+                  color: Colors.black.withValues(alpha: .10),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),
@@ -74,7 +74,7 @@ class _BoussoleButtonState extends State<BoussoleButton> {
                     height: 36,
                     decoration: BoxDecoration(
                       color: widget.isPrimary
-                          ? Colors.white.withOpacity(.20)
+                          ? Colors.white.withValues(alpha: .20)
                           : const Color(0xFFEFF5FF),
                       shape: BoxShape.circle,
                     ),

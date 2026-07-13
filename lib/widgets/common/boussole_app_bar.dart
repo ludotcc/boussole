@@ -1,36 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/app_colors.dart';
-
 class BoussoleAppBar extends StatelessWidget implements PreferredSizeWidget {
   const BoussoleAppBar({
     super.key,
     required this.title,
     this.showBackButton = true,
+    this.fallbackLocation,
     this.actions,
   });
 
   final String title;
   final bool showBackButton;
+  final String? fallbackLocation;
   final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context) {
+    final canGoBack =
+        showBackButton && (context.canPop() || fallbackLocation != null);
+
     return AppBar(
-      backgroundColor: AppColors.background,
       elevation: 0,
       centerTitle: false,
-
-      leading: showBackButton
+      leading: canGoBack
           ? IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              onPressed: () => context.pop(),
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else if (fallbackLocation != null) {
+                  context.go(fallbackLocation!);
+                }
+              },
             )
           : null,
-
       title: Text(title),
-
       actions: actions,
     );
   }

@@ -58,19 +58,4 @@ class AppColors {
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
-  // ---------------------------------------------------------------------------
-  // Couleurs des moments
-  // ---------------------------------------------------------------------------
-
-  static const Color momentMorning = Color(0xFF4DA3FF);
-
-  static const Color momentMeal = Color(0xFFFFA726);
-
-  static const Color momentSchool = Color(0xFF7E57C2);
-
-  static const Color momentLeisure = Color(0xFF26A69A);
-
-  static const Color momentEvening = Color(0xFF3F51B5);
-
-  static const Color momentHygiene = Color(0xFF66BB6A);
 }

@@ -7,14 +7,44 @@ import 'family_provider.dart';
 class ChildCreationNotifier extends StateNotifier<ChildCreationModel?> {
   ChildCreationNotifier() : super(null);
 
+  void createAvatarDraft({required String avatar}) {
+    state = ChildCreationModel(firstName: '', age: 0, avatar: avatar);
+  }
+
   void createDraft({required String firstName, required int age}) {
     state = ChildCreationModel(firstName: firstName, age: age, avatar: '');
+  }
+
+  void updateInfo({
+    required String firstName,
+    required int age,
+    required String profileType,
+  }) {
+    if (state == null) return;
+
+    state = state!.copyWith(
+      firstName: firstName,
+      age: age,
+      profileType: profileType,
+    );
   }
 
   void updateAvatar(String avatar) {
     if (state == null) return;
 
     state = state!.copyWith(avatar: avatar);
+  }
+
+  void updateAcademy(String academyId) {
+    if (state == null) return;
+
+    state = state!.copyWith(academyId: academyId);
+  }
+
+  void updateWeeklyRhythm(Map<int, String> weeklyRhythmByWeekday) {
+    if (state == null) return;
+
+    state = state!.copyWith(weeklyRhythmByWeekday: weeklyRhythmByWeekday);
   }
 
   void clear() {
@@ -30,12 +60,45 @@ final childCreationProvider =
 class ChildRegistrationNotifier extends FamilyActionNotifier {
   ChildRegistrationNotifier(super.ref);
 
-  Future<void> finishRegistration({required String avatar}) {
+  Future<void> createChildProfile({
+    required String firstName,
+    required int age,
+    required String avatar,
+    required String profileType,
+    String? academyId,
+    Map<int, String>? weeklyRhythmByWeekday,
+  }) {
+    return runFamilyAction((familyId) {
+      if (firstName.trim().isEmpty || age <= 0 || avatar.isEmpty) {
+        throw Exception("Merci de compléter correctement le profil enfant.");
+      }
+
+      return ref
+          .read(familyRepositoryProvider)
+          .createChildProfile(
+            familyId: familyId,
+            firstName: firstName.trim(),
+            age: age,
+            avatar: avatar,
+            profileType: profileType,
+            academyId: academyId,
+            weeklyRhythmByWeekday: weeklyRhythmByWeekday,
+          );
+    });
+  }
+
+  Future<void> finishRegistration() {
     return runFamilyAction((familyId) async {
       final draft = ref.read(childCreationProvider);
 
       if (draft == null) {
         throw Exception("Impossible de terminer l'inscription.");
+      }
+
+      if (draft.firstName.trim().isEmpty ||
+          draft.age <= 0 ||
+          draft.avatar.isEmpty) {
+        throw Exception("Merci de compléter correctement le profil enfant.");
       }
 
       await ref
@@ -44,7 +107,10 @@ class ChildRegistrationNotifier extends FamilyActionNotifier {
             familyId: familyId,
             firstName: draft.firstName,
             age: draft.age,
-            avatar: avatar,
+            avatar: draft.avatar,
+            profileType: draft.profileType,
+            academyId: draft.academyId,
+            weeklyRhythmByWeekday: draft.weeklyRhythmByWeekday,
           );
 
       ref.read(childCreationProvider.notifier).clear();

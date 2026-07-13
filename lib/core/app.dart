@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../routes/app_router.dart';
@@ -13,7 +14,10 @@ class BoussoleApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       title: 'Boussole',
       theme: AppTheme.lightTheme,
-      routerConfig: appRouter,
+      locale: const Locale('fr', 'FR'),
+      supportedLocales: const [Locale('fr', 'FR')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      routerConfig: ref.watch(appRouterProvider),
     );
   }
 }

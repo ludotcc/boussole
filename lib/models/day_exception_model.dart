@@ -1,6 +1,9 @@
+const _unset = Object();
+
 class DayExceptionModel {
   final String id;
   final String familyId;
+  final String? childId;
 
   /// Jour concerné au format yyyy-MM-dd.
   final String dateKey;
@@ -23,6 +26,7 @@ class DayExceptionModel {
   const DayExceptionModel({
     required this.id,
     required this.familyId,
+    this.childId,
     required this.dateKey,
     required this.dayTypeId,
     required this.momentIds,
@@ -35,6 +39,7 @@ class DayExceptionModel {
     return {
       'id': id,
       'familyId': familyId,
+      'childId': childId,
       'dateKey': dateKey,
       'dayTypeId': dayTypeId,
       'momentIds': momentIds,
@@ -48,6 +53,7 @@ class DayExceptionModel {
     return DayExceptionModel(
       id: map['id'] as String,
       familyId: map['familyId'] as String,
+      childId: map['childId'] as String?,
       dateKey: map['dateKey'] as String,
       dayTypeId: map['dayTypeId'] as String,
       momentIds: List<String>.from(map['momentIds'] ?? const []),
@@ -60,6 +66,7 @@ class DayExceptionModel {
   DayExceptionModel copyWith({
     String? id,
     String? familyId,
+    Object? childId = _unset,
     String? dateKey,
     String? dayTypeId,
     String? familyPlanningId,
@@ -71,6 +78,7 @@ class DayExceptionModel {
     return DayExceptionModel(
       id: id ?? this.id,
       familyId: familyId ?? this.familyId,
+      childId: childId == _unset ? this.childId : childId as String?,
       dateKey: dateKey ?? this.dateKey,
       dayTypeId: familyPlanningId ?? dayTypeId ?? this.dayTypeId,
       momentIds: momentIds ?? this.momentIds,

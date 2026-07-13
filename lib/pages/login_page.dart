@@ -152,11 +152,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.95),
+                      color: Colors.white.withValues(alpha: .95),
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(.08),
+                          color: Colors.black.withValues(alpha: .08),
                           blurRadius: 18,
                           offset: const Offset(0, 8),
                         ),
@@ -232,12 +232,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 24),
                   OutlinedButton.icon(
                     onPressed: () {},
-                    icon: Image.asset(
-                      "assets/images/logo/google.png",
-                      width: 22,
-                      errorBuilder: (_, __, ___) =>
-                          const Icon(Icons.g_mobiledata, size: 28),
-                    ),
+                    icon: const Icon(Icons.g_mobiledata, size: 28),
                     label: const Text(
                       "Continuer avec Google",
                       style: TextStyle(

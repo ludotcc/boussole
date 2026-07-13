@@ -7,17 +7,19 @@ class AvatarGrid extends StatelessWidget {
     super.key,
     required this.selectedAvatarId,
     required this.onAvatarSelected,
+    this.avatars = AvatarConstants.avatars,
   });
 
   final String? selectedAvatarId;
   final ValueChanged<String> onAvatarSelected;
+  final List<AvatarItem> avatars;
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: AvatarConstants.avatars.length,
+      itemCount: avatars.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 16,
@@ -25,7 +27,7 @@ class AvatarGrid extends StatelessWidget {
         childAspectRatio: 1,
       ),
       itemBuilder: (context, index) {
-        final avatar = AvatarConstants.avatars[index];
+        final avatar = avatars[index];
 
         final bool selected = avatar.id == selectedAvatarId;
 

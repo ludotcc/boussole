@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'boussole_colors.dart';
@@ -21,11 +22,26 @@ class BoussoleTheme {
       displayColor: BoussoleColors.textPrimary,
     ),
 
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.transparent,
+    appBarTheme: AppBarTheme(
+      backgroundColor: const Color.fromARGB(255, 98, 129, 161),
       elevation: 0,
       centerTitle: true,
-      foregroundColor: BoussoleColors.textPrimary,
+      foregroundColor: Colors.white,
+      titleTextStyle: GoogleFonts.nunitoSans(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+      ),
+      iconTheme: const IconThemeData(color: Colors.white),
+      actionsIconTheme: const IconThemeData(color: Colors.white),
+      systemOverlayStyle: const SystemUiOverlayStyle(
+        statusBarColor: Colors.black,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarColor: Color(0xFF1F2937),
+        systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarDividerColor: Color(0xFF1F2937),
+      ),
     ),
 
     cardTheme: const CardThemeData(

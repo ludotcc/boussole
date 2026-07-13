@@ -1,132 +1,33 @@
 # ARCHITECTURE_RULES.md
-
 # Architecture officielle de Boussole
-
-Ce document est la référence absolue.
-
-Toute nouvelle fonctionnalité doit respecter ces règles.
+Version : 2.0
+Dernière mise à jour : 13 juillet 2026
 
 ---
 
-# Principe n°1
+# Vision
 
-Ne jamais casser une architecture existante.
+L'architecture de Boussole est conçue pour rester simple, évolutive et maintenable.
 
-Toujours s'intégrer à l'existant.
+Chaque couche possède une responsabilité unique.
 
----
-
-# Principe n°2
-
-Une responsabilité = un fichier.
-
-Éviter les fichiers "fourre-tout".
+Aucune logique métier ne doit être placée dans les pages.
 
 ---
 
-# Principe n°3
+# Architecture officielle
 
-Une page ne contient jamais de logique métier.
+Page
 
-Une page :
+↓
 
-- affiche
-- appelle un provider
-- gère l'affichage
+Widget
 
-Rien d'autre.
+↓
 
----
+Provider Riverpod
 
-# Principe n°4
-
-Les Providers
-
-Ils :
-
-- exposent l'état
-- déclenchent les actions
-
-Ils ne connaissent pas Firestore.
-
----
-
-# Principe n°5
-
-Les Repositories
-
-Ils contiennent les cas d'usage métier.
-
-Ils orchestrent les services.
-
-Ils sont le cœur fonctionnel.
-
----
-
-# Principe n°6
-
-Les Services
-
-Ils dialoguent avec :
-
-- Firebase
-- Firestore
-- Storage
-- API
-
-Ils ne contiennent pas de logique fonctionnelle.
-
----
-
-# Principe n°7
-
-Les Models
-
-Ils représentent uniquement les données.
-
-Ils possèdent :
-
-- toMap()
-- fromMap()
-
-Ils ne connaissent pas Flutter.
-
----
-
-# Principe n°8
-
-Les Widgets
-
-Toujours petits.
-
-Toujours réutilisables.
-
-Jamais de logique métier.
-
----
-
-# Principe n°9
-
-Les Pages
-
-Une page = une responsabilité.
-
-Une page ne dépasse idéalement pas 300 lignes.
-
-Si elle devient trop grande :
-
-→ créer des widgets.
-
----
-
-# Principe n°10
-
-Ne jamais accéder directement à Firestore depuis :
-
-- une page
-- un widget
-
-Toujours passer par :
+↓
 
 Repository
 
@@ -136,65 +37,171 @@ Service
 
 ↓
 
+Firebase / Firestore
+
+Les dépendances descendent toujours dans ce sens.
+
+---
+
+# Responsabilités
+
+## Pages
+
+- affichage ;
+- navigation ;
+- saisie utilisateur.
+
+Aucune logique métier.
+
+## Widgets
+
+- composants réutilisables ;
+- animations ;
+- logique d'interface locale.
+
+## Providers
+
+- état ;
+- chargement ;
+- erreurs ;
+- orchestration des actions.
+
+## Repositories
+
+- logique métier ;
+- validation ;
+- coordination des services.
+
+## Services
+
+- Firebase ;
+- Firestore ;
+- Authentification ;
+- stockage local ;
+- accès techniques.
+
+## Models
+
+- données ;
+- sérialisation ;
+- désérialisation.
+
+---
+
+# Architecture métier du Sprint 15
+
+Le Sprint 15 ajoute une couche fonctionnelle sans modifier l'architecture technique.
+
+Les nouveaux domaines métier sont :
+
+- Gardiens des Repères
+- Maison
+- Économie des Éclats
+- Missions Secrètes
+- Moteur des Repères
+- Modes d'appareil
+
+Ces domaines restent implémentés via les repositories et providers existants ou futurs.
+
+---
+
+# Flux du Gardien
+
+Profil enfant
+
+↓
+
+Moteur des Repères
+
+↓
+
+GuardianRepository
+
+↓
+
+GuardianService
+
+↓
+
 Firestore
 
----
+Le Gardien n'exécute jamais directement de logique métier.
 
-# Principe n°11
-
-Toujours privilégier :
-
-Lisibilité
-
-avant
-
-Performance prématurée.
+Toutes les décisions passent par le Moteur des Repères.
 
 ---
 
-# Principe n°12
+# Repositories prévus
 
-Une nouvelle fonctionnalité doit :
+Le projet pourra accueillir progressivement :
 
-- respecter l'existant
-- être facilement testable
-- être réutilisable
-- être documentée si nécessaire
+- GuardianRepository
+- HouseRepository
+- RewardsRepository
+- MissionRepository
+- ChildProfileRepository
 
----
-
-# Principe n°13
-
-Avant de coder :
-
-Lire.
-
-Comprendre.
-
-Proposer.
-
-Puis seulement développer.
+Uniquement lorsqu'un domaine deviendra suffisamment important.
 
 ---
 
-# Principe n°14
+# Navigation
 
-Ne jamais modifier plusieurs systèmes différents si une solution plus simple existe.
+GoRouter reste le routeur officiel.
 
----
+Les espaces Parent et Enfant doivent rester clairement séparés.
 
-# Principe n°15
+Le mode d'appareil décide de l'expérience affichée :
 
-Toujours réfléchir à l'impact sur :
-
-- les parents
-- les enfants
-- l'expérience utilisateur
-- les performances
-- la maintenabilité
+- Téléphone familial
+- Tablette personnelle enfant
+- Tablette partagée
 
 ---
 
-# Philosophie
+# Firebase
 
-Le meilleur code est celui qui sera encore agréable à maintenir dans 5 ans.
+Aucun accès direct à Firestore depuis :
+
+- une Page ;
+- un Widget ;
+- un Provider.
+
+Toutes les écritures transitent par un Repository puis un Service.
+
+---
+
+# Principes
+
+Toujours :
+
+- privilégier la réutilisation ;
+- limiter les dépendances ;
+- séparer présentation et métier ;
+- conserver une architecture lisible.
+
+Ne jamais :
+
+- dupliquer une logique métier ;
+- contourner un Repository ;
+- accéder directement à Firestore depuis l'interface.
+
+---
+
+# Évolutivité
+
+L'architecture est pensée pour accueillir :
+
+- de nouveaux Gardiens ;
+- une IA d'accompagnement ;
+- de nouvelles Maisons ;
+- de nouvelles économies ;
+- de nouveaux domaines fonctionnels.
+
+Sans remettre en cause les fondations existantes.
+
+---
+
+# Objectif
+
+L'architecture doit permettre à Boussole d'évoluer pendant plusieurs années tout en restant simple à maintenir, cohérente et compréhensible pour toute personne rejoignant le projet.

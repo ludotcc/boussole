@@ -5,8 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/session_provider.dart';
-import '../repositories/family_repository.dart';
+import '../providers/app_bootstrap_provider.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -16,8 +15,6 @@ class SplashPage extends ConsumerStatefulWidget {
 }
 
 class _SplashPageState extends ConsumerState<SplashPage> {
-  final FamilyRepository _repository = FamilyRepository();
-
   @override
   void initState() {
     super.initState();
@@ -25,22 +22,15 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   }
 
   Future<void> _restoreSession() async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.wait([
+      ref.read(appBootstrapProvider.notifier).bootstrap(),
+      Future<void>.delayed(const Duration(milliseconds: 900)),
+    ]);
 
     if (!mounted) return;
 
-    final session = await _repository.restoreSession();
-
-    if (!mounted) return;
-
-    if (session == null) {
-      context.go('/welcome');
-      return;
-    }
-
-    ref.read(sessionProvider.notifier).setSession(session);
-
-    context.go('/home');
+    final state = ref.read(appBootstrapProvider);
+    context.go(state.destination ?? '/welcome');
   }
 
   @override

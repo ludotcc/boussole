@@ -224,7 +224,10 @@ class MomentRoutinesPage extends ConsumerWidget {
                           value: 'morning',
                           child: Text("Matin"),
                         ),
-                        DropdownMenuItem(value: 'meal', child: Text("Repas")),
+                        DropdownMenuItem(
+                          value: 'breakfast',
+                          child: Text("breakfast"),
+                        ),
                         DropdownMenuItem(
                           value: 'homework',
                           child: Text("Devoirs"),

@@ -17,7 +17,6 @@ class CreateFamilyPage extends ConsumerStatefulWidget {
 
 class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
   final _familyController = TextEditingController();
-  final _parentController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -30,7 +29,6 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
   @override
   void dispose() {
     _familyController.dispose();
-    _parentController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -58,7 +56,6 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
 
   Future<void> _createFamily() async {
     if (_familyController.text.trim().isEmpty ||
-        _parentController.text.trim().isEmpty ||
         _emailController.text.trim().isEmpty ||
         _passwordController.text.isEmpty ||
         _confirmPasswordController.text.isEmpty) {
@@ -85,7 +82,6 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
           .read(familyRepositoryProvider)
           .createFamily(
             familyName: _familyController.text.trim(),
-            parentName: _parentController.text.trim(),
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
@@ -94,7 +90,7 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
 
       if (!mounted) return;
 
-      context.go('/select-avatar');
+      context.go('/family-members');
     } on FirebaseAuthException catch (e) {
       String message = "Une erreur est survenue.";
 
@@ -102,15 +98,12 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
         case 'email-already-in-use':
           message = "Cette adresse e-mail est déjà utilisée.";
           break;
-
         case 'invalid-email':
           message = "Adresse e-mail invalide.";
           break;
-
         case 'weak-password':
           message = "Le mot de passe est trop faible.";
           break;
-
         default:
           message = e.message ?? message;
       }
@@ -149,9 +142,7 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
                     onPressed: () => context.pop(),
                     icon: const Icon(Icons.arrow_back_ios_new),
                   ),
-
                   const SizedBox(height: 10),
-
                   const Text(
                     "Créer une famille",
                     style: TextStyle(
@@ -160,24 +151,20 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
                       color: Color(0xFF20305E),
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   const Text(
-                    "Bienvenue 👋\nCréons votre espace familial.",
+                    "Créons d'abord votre compte famille.",
                     style: TextStyle(fontSize: 18, color: Color(0xFF4F5D75)),
                   ),
-
                   const SizedBox(height: 30),
-
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.95),
+                      color: Colors.white.withValues(alpha: .95),
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(.08),
+                          color: Colors.black.withValues(alpha: .08),
                           blurRadius: 18,
                           offset: const Offset(0, 8),
                         ),
@@ -192,19 +179,7 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
                             icon: Icons.home_work_outlined,
                           ),
                         ),
-
                         const SizedBox(height: 18),
-
-                        TextField(
-                          controller: _parentController,
-                          decoration: _inputDecoration(
-                            label: "Votre prénom",
-                            icon: Icons.person_outline,
-                          ),
-                        ),
-
-                        const SizedBox(height: 18),
-
                         TextField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
@@ -213,9 +188,7 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
                             icon: Icons.email_outlined,
                           ),
                         ),
-
                         const SizedBox(height: 18),
-
                         TextField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
@@ -236,9 +209,7 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 18),
-
                         TextField(
                           controller: _confirmPasswordController,
                           obscureText: _obscureConfirmPassword,
@@ -260,9 +231,7 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 18),
-
                         CheckboxListTile(
                           value: _acceptTerms,
                           activeColor: const Color(0xFF3A86FF),
@@ -278,13 +247,11 @@ class _CreateFamilyPageState extends ConsumerState<CreateFamilyPage> {
                             });
                           },
                         ),
-
                         const SizedBox(height: 20),
-
                         _isLoading
                             ? const CircularProgressIndicator()
                             : BoussoleButton(
-                                text: "Créer ma famille",
+                                text: "Créer le compte famille",
                                 icon: Icons.family_restroom,
                                 onPressed: _createFamily,
                               ),

@@ -24,7 +24,7 @@ class AppTextStyles {
   static const TextStyle h2 = TextStyle(
     fontSize: 26,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
+    color: Color.fromARGB(255, 255, 255, 255),
   );
 
   static const TextStyle h3 = TextStyle(
