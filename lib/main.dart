@@ -21,6 +21,8 @@ const _systemUiOverlayStyle = SystemUiOverlayStyle(
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await Hive.initFlutter();
 

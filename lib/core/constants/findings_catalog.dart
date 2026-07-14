@@ -1,0 +1,111 @@
+import '../../models/finding_catalog_item.dart';
+
+const findingsCatalog = <FindingCatalogItem>[
+  FindingCatalogItem(
+    id: 'small_plant',
+    name: 'Petite plante',
+    description: 'Un peu de vert pour la Maison.',
+    category: FindingCategory.plant,
+    rarity: FindingRarity.common,
+    price: 20,
+    iconId: 'plant',
+    colorValue: 0xFF8BC6A0,
+  ),
+  FindingCatalogItem(
+    id: 'soft_lamp',
+    name: 'Lampe douce',
+    description: 'Une lumière calme pour le soir.',
+    category: FindingCategory.light,
+    rarity: FindingRarity.common,
+    price: 35,
+    iconId: 'lamp',
+    colorValue: 0xFFFFC978,
+  ),
+  FindingCatalogItem(
+    id: 'star_cushion',
+    name: 'Coussin étoilé',
+    description: 'Un coussin pour rêver loin.',
+    category: FindingCategory.decoration,
+    rarity: FindingRarity.common,
+    price: 40,
+    iconId: 'star',
+    colorValue: 0xFF9CB8E8,
+  ),
+  FindingCatalogItem(
+    id: 'small_rug',
+    name: 'Petit tapis',
+    description: 'Un coin tout doux et accueillant.',
+    category: FindingCategory.furniture,
+    rarity: FindingRarity.uncommon,
+    price: 55,
+    iconId: 'rug',
+    colorValue: 0xFFE7A6A6,
+  ),
+  FindingCatalogItem(
+    id: 'adventure_book',
+    name: 'Livre d’aventures',
+    description: 'Des histoires à partager.',
+    category: FindingCategory.accessory,
+    rarity: FindingRarity.uncommon,
+    price: 65,
+    iconId: 'book',
+    colorValue: 0xFFB59BDC,
+  ),
+  FindingCatalogItem(
+    id: 'round_clock',
+    name: 'Horloge ronde',
+    description: 'Un joli repère dans la journée.',
+    category: FindingCategory.decoration,
+    rarity: FindingRarity.uncommon,
+    price: 80,
+    iconId: 'clock',
+    colorValue: 0xFF80B9C7,
+  ),
+  FindingCatalogItem(
+    id: 'light_mobile',
+    name: 'Mobile lumineux',
+    description: 'Des lueurs qui dansent doucement.',
+    category: FindingCategory.light,
+    rarity: FindingRarity.uncommon,
+    price: 105,
+    iconId: 'mobile',
+    colorValue: 0xFF8ED4D0,
+  ),
+  FindingCatalogItem(
+    id: 'memory_box',
+    name: 'Boîte à souvenirs',
+    description: 'Pour garder les beaux moments.',
+    category: FindingCategory.souvenir,
+    rarity: FindingRarity.rare,
+    price: 150,
+    iconId: 'box',
+    colorValue: 0xFFD5A56F,
+  ),
+  FindingCatalogItem(
+    id: 'small_shelf',
+    name: 'Petite étagère',
+    description: 'Une place pour chaque trouvaille.',
+    category: FindingCategory.furniture,
+    rarity: FindingRarity.rare,
+    price: 180,
+    iconId: 'shelf',
+    colorValue: 0xFFA98D78,
+  ),
+  FindingCatalogItem(
+    id: 'color_lantern',
+    name: 'Lanterne colorée',
+    description: 'Une lumière rare et chaleureuse.',
+    category: FindingCategory.light,
+    rarity: FindingRarity.rare,
+    price: 220,
+    iconId: 'lantern',
+    colorValue: 0xFFE58B73,
+  ),
+];
+
+FindingCatalogItem? findingById(String id) {
+  for (final item in findingsCatalog) {
+    if (item.id == id) return item;
+  }
+  return null;
+}

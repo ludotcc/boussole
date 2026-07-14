@@ -77,6 +77,94 @@ class AppAssets {
   static const String backgroundEvening =
       'assets/images/backgrounds/background_soir.png';
 
+  static const String houseBackground =
+      'assets/images/house/house_background.png';
+
+  // ---------------------------------------------------------------------------
+  // Gardiens
+  // ---------------------------------------------------------------------------
+
+  static const String guardianCrystalIdle =
+      'assets/images/guardians/crystal/guardian_crystal_idle.png';
+  static const String guardianCrystalWelcome =
+      'assets/images/guardians/crystal/guardian_crystal_welcome.png';
+  static const String guardianCrystalTalking =
+      'assets/images/guardians/crystal/guardian_crystal_talking.png';
+  static const String guardianCrystalChoices =
+      'assets/images/guardians/crystal/guardian_crystal_choices.png';
+  static const String guardianCrystalEncourage =
+      'assets/images/guardians/crystal/guardian_crystal_encourage.png';
+  static const String guardianCrystalReassure =
+      'assets/images/guardians/crystal/guardian_crystal_reassure.png';
+  static const String guardianCrystalCelebrate =
+      'assets/images/guardians/crystal/guardian_crystal_celebrate.png';
+  static const String guardianCrystalSleeping =
+      'assets/images/guardians/crystal/guardian_crystal_sleeping.png';
+  static const String guardianPixelIdle =
+      'assets/images/guardians/pixel/guardian_pixel_idle.png';
+  static const String guardianPixelWelcome =
+      'assets/images/guardians/pixel/guardian_pixel_welcome.png';
+  static const String guardianPixelTalking =
+      'assets/images/guardians/pixel/guardian_pixel_talking.png';
+  static const String guardianPixelChoices =
+      'assets/images/guardians/pixel/guardian_pixel_choices.png';
+  static const String guardianPixelEncourage =
+      'assets/images/guardians/pixel/guardian_pixel_encourage.png';
+  static const String guardianPixelReassure =
+      'assets/images/guardians/pixel/guardian_pixel_reassure.png';
+  static const String guardianPixelCelebrate =
+      'assets/images/guardians/pixel/guardian_pixel_celebrate.png';
+  static const String guardianPixelSleeping =
+      'assets/images/guardians/pixel/guardian_pixel_sleeping.png';
+  static const String guardianPyroIdle =
+      'assets/images/guardians/pyro/guardian_pyro_idle.png';
+  static const String guardianPyroWelcome =
+      'assets/images/guardians/pyro/guardian_pyro_welcome.png';
+  static const String guardianPyroTalking =
+      'assets/images/guardians/pyro/guardian_pyro_talking.png';
+  static const String guardianPyroChoices =
+      'assets/images/guardians/pyro/guardian_pyro_choices.png';
+  static const String guardianPyroEncourage =
+      'assets/images/guardians/pyro/guardian_pyro_encourage.png';
+  static const String guardianPyroReassure =
+      'assets/images/guardians/pyro/guardian_pyro_reassure.png';
+  static const String guardianPyroCelebrate =
+      'assets/images/guardians/pyro/guardian_pyro_celebrate.png';
+  static const String guardianPyroSleeping =
+      'assets/images/guardians/pyro/guardian_pyro_sleeping.png';
+  static const String guardianGearIdle =
+      'assets/images/guardians/gear/guardian_gear_idle.png';
+  static const String guardianGearWelcome =
+      'assets/images/guardians/gear/guardian_gear_welcome.png';
+  static const String guardianGearTalking =
+      'assets/images/guardians/gear/guardian_gear_talking.png';
+  static const String guardianGearChoices =
+      'assets/images/guardians/gear/guardian_gear_choices.png';
+  static const String guardianGearEncourage =
+      'assets/images/guardians/gear/guardian_gear_encourage.png';
+  static const String guardianGearReassure =
+      'assets/images/guardians/gear/guardian_gear_reassure.png';
+  static const String guardianGearCelebrate =
+      'assets/images/guardians/gear/guardian_gear_celebrate.png';
+  static const String guardianGearSleeping =
+      'assets/images/guardians/gear/guardian_gear_sleeping.png';
+  static const String guardianWaveIdle =
+      'assets/images/guardians/wave/guardian_wave_idle.png';
+  static const String guardianWaveWelcome =
+      'assets/images/guardians/wave/guardian_wave_welcome.png';
+  static const String guardianWaveTalking =
+      'assets/images/guardians/wave/guardian_wave_talking.png';
+  static const String guardianWaveChoices =
+      'assets/images/guardians/wave/guardian_wave_choices.png';
+  static const String guardianWaveEncourage =
+      'assets/images/guardians/wave/guardian_wave_encourage.png';
+  static const String guardianWaveReassure =
+      'assets/images/guardians/wave/guardian_wave_reassure.png';
+  static const String guardianWaveCelebrate =
+      'assets/images/guardians/wave/guardian_wave_celebrate.png';
+  static const String guardianWaveSleeping =
+      'assets/images/guardians/wave/guardian_wave_sleeping.png';
+
   // ---------------------------------------------------------------------------
   // Routines
   // ---------------------------------------------------------------------------

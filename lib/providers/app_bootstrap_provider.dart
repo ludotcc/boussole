@@ -7,51 +7,31 @@ import 'parent_access_provider.dart';
 import 'session_provider.dart';
 
 class AppBootstrapState {
-  const AppBootstrapState({
-    this.isLoading = false,
-    this.destination,
-    this.error,
-  });
+  const AppBootstrapState({this.destination});
 
-  final bool isLoading;
   final String? destination;
-  final Object? error;
 }
 
-class AppBootstrapNotifier extends StateNotifier<AppBootstrapState> {
-  AppBootstrapNotifier(this.ref) : super(const AppBootstrapState());
+final appBootstrapProvider = FutureProvider<AppBootstrapState>((ref) async {
+  var isDisposed = false;
+  ref.onDispose(() => isDisposed = true);
 
-  final Ref ref;
+  final configuration = await ref
+      .read(deviceConfigurationProvider.notifier)
+      .load();
+  if (isDisposed) return const AppBootstrapState();
 
-  Future<void> bootstrap() async {
-    if (state.isLoading) return;
-    state = const AppBootstrapState(isLoading: true);
+  ref.read(parentAccessProvider.notifier).syncWithConfiguration(configuration);
 
-    try {
-      final configuration = await ref
-          .read(deviceConfigurationProvider.notifier)
-          .load();
-      ref
-          .read(parentAccessProvider.notifier)
-          .syncWithConfiguration(configuration);
+  final session = await ref.read(familyRepositoryProvider).restoreSession();
+  if (isDisposed) return const AppBootstrapState();
 
-      final session = await ref.read(familyRepositoryProvider).restoreSession();
-      if (session == null) {
-        state = const AppBootstrapState(destination: '/welcome');
-        return;
-      }
-
-      ref.read(sessionProvider.notifier).setSession(session);
-      ref.read(activeChildProvider.notifier).state =
-          configuration.personalChildId;
-      state = AppBootstrapState(destination: configuration.childStartLocation);
-    } catch (error) {
-      state = AppBootstrapState(error: error);
-    }
+  if (session == null) {
+    return const AppBootstrapState(destination: '/welcome');
   }
-}
 
-final appBootstrapProvider =
-    StateNotifierProvider<AppBootstrapNotifier, AppBootstrapState>((ref) {
-      return AppBootstrapNotifier(ref);
-    });
+  ref.read(sessionProvider.notifier).setSession(session);
+  ref.read(activeChildProvider.notifier).state = configuration.personalChildId;
+
+  return AppBootstrapState(destination: configuration.childStartLocation);
+});

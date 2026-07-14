@@ -1,40 +1,16 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../providers/app_bootstrap_provider.dart';
 
-class SplashPage extends ConsumerStatefulWidget {
+class SplashPage extends ConsumerWidget {
   const SplashPage({super.key});
 
   @override
-  ConsumerState<SplashPage> createState() => _SplashPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bootstrap = ref.watch(appBootstrapProvider);
 
-class _SplashPageState extends ConsumerState<SplashPage> {
-  @override
-  void initState() {
-    super.initState();
-    _restoreSession();
-  }
-
-  Future<void> _restoreSession() async {
-    await Future.wait([
-      ref.read(appBootstrapProvider.notifier).bootstrap(),
-      Future<void>.delayed(const Duration(milliseconds: 900)),
-    ]);
-
-    if (!mounted) return;
-
-    final state = ref.read(appBootstrapProvider);
-    context.go(state.destination ?? '/welcome');
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -46,10 +22,33 @@ class _SplashPageState extends ConsumerState<SplashPage> {
           ),
         ),
         child: Center(
-          child: Image.asset('assets/images/logo/logo.png', width: 280)
-              .animate()
-              .fadeIn(duration: 900.ms)
-              .scale(begin: const Offset(.9, .9), end: const Offset(1, 1)),
+          child: bootstrap.hasError
+              ? Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        size: 52,
+                        color: Color(0xFFE45757),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Boussole ne peut pas démarrer pour le moment.',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                )
+              : Image.asset('assets/images/logo/logo.png', width: 280)
+                    .animate()
+                    .fadeIn(duration: 900.ms)
+                    .scale(
+                      begin: const Offset(.9, .9),
+                      end: const Offset(1, 1),
+                    ),
         ),
       ),
     );

@@ -60,6 +60,12 @@ flutter:
     - assets/images/rewards/
     - assets/images/badges/
     - assets/images/routines/
+    - assets/images/house/house_background.png
+    - assets/images/guardians/crystal/
+    - assets/images/guardians/pixel/
+    - assets/images/guardians/pyro/
+    - assets/images/guardians/gear/
+    - assets/images/guardians/wave/
     - assets/data/
     - assets/data/school_holidays/
 

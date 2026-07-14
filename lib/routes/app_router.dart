@@ -18,6 +18,11 @@ import '../pages/family_members_management_page.dart';
 import '../pages/family_settings_page.dart';
 import '../pages/device_mode_settings_page.dart';
 import '../pages/house_page.dart';
+import '../pages/guardian_selection_page.dart';
+import '../pages/findings_page.dart';
+import '../pages/secret_mission_page.dart';
+import '../pages/shared_moments_page.dart';
+import '../pages/parent_mission_validations_page.dart';
 import '../pages/login_page.dart';
 import '../pages/member_detail_page.dart';
 import '../pages/moment_routines_page.dart';
@@ -34,6 +39,7 @@ import '../models/moment_model.dart';
 import '../models/family_event_model.dart';
 import '../models/family_member_model.dart';
 import '../models/routine_model.dart';
+import '../providers/app_bootstrap_provider.dart';
 import '../providers/device_mode_provider.dart';
 import '../providers/parent_access_provider.dart';
 import '../providers/session_provider.dart';
@@ -41,6 +47,7 @@ import '../providers/session_provider.dart';
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = _RouterRefreshNotifier();
   ref.onDispose(refreshNotifier.dispose);
+  ref.listen(appBootstrapProvider, (_, _) => refreshNotifier.refresh());
   ref.listen(sessionProvider, (_, _) => refreshNotifier.refresh());
   ref.listen(deviceConfigurationProvider, (_, _) => refreshNotifier.refresh());
   ref.listen(parentAccessProvider, (_, _) => refreshNotifier.refresh());
@@ -50,11 +57,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: refreshNotifier,
     redirect: (context, state) {
       final path = state.uri.path;
+      final bootstrap = ref.read(appBootstrapProvider);
       final session = ref.read(sessionProvider);
       final configurationAsync = ref.read(deviceConfigurationProvider);
       final parentAccess = ref.read(parentAccessProvider);
 
-      if (path == '/') return null;
+      if (path == '/') {
+        return bootstrap.valueOrNull?.destination;
+      }
+
+      if (!bootstrap.hasValue) return '/';
 
       const publicPaths = {'/welcome', '/login', '/create-family'};
 
@@ -154,6 +166,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/child/:childId/house',
         builder: (_, state) =>
             HousePage(childId: state.pathParameters['childId']!),
+      ),
+
+      GoRoute(
+        path: '/child/:childId/guardian',
+        builder: (_, state) =>
+            GuardianSelectionPage(childId: state.pathParameters['childId']!),
+      ),
+
+      GoRoute(
+        path: '/child/:childId/findings',
+        builder: (_, state) =>
+            FindingsPage(childId: state.pathParameters['childId']!),
+      ),
+
+      GoRoute(
+        path: '/child/:childId/secret-mission/:missionId',
+        builder: (_, state) => SecretMissionPage(
+          childId: state.pathParameters['childId']!,
+          missionId: state.pathParameters['missionId']!,
+        ),
+      ),
+
+      GoRoute(
+        path: '/child/:childId/shared-moments',
+        builder: (_, state) =>
+            SharedMomentsPage(childId: state.pathParameters['childId']!),
+      ),
+
+      GoRoute(
+        path: '/parent/mission-validations',
+        builder: (_, _) => const ParentMissionValidationsPage(),
       ),
 
       GoRoute(

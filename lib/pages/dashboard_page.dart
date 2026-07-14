@@ -218,6 +218,14 @@ class _QuickAccessSection extends ConsumerWidget {
               color: AppColors.gold,
               onTap: () => context.push('/family-agenda'),
             ),
+            const SizedBox(height: 16),
+            _DashboardImageCard(
+              title: 'Missions à valider',
+              subtitle: 'Reconnaître les beaux moments',
+              imagePath: 'assets/images/objects/page_planning.png',
+              color: AppColors.primary,
+              onTap: () => context.push('/parent/mission-validations'),
+            ),
             if (papa != null) ...[
               const SizedBox(height: 16),
               _ParentSpaceCard(

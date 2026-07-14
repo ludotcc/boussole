@@ -223,19 +223,20 @@ class _TodayPageState extends ConsumerState<TodayPage> {
                                       firstName: child.firstName,
                                       avatarId: child.avatar,
                                       onAvatarTap: () async {
-                                        final updated = await Navigator.of(
-                                          context,
-                                        ).push<bool>(
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                ChildAvatarPickerPage(
-                                                  member:
-                                                      FamilyMemberModel.fromChild(
-                                                        child,
-                                                      ),
-                                                ),
-                                          ),
-                                        );
+                                        final updated =
+                                            await Navigator.of(
+                                              context,
+                                            ).push<bool>(
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    ChildAvatarPickerPage(
+                                                      member:
+                                                          FamilyMemberModel.fromChild(
+                                                            child,
+                                                          ),
+                                                    ),
+                                              ),
+                                            );
 
                                         if (updated == true) {
                                           ref.invalidate(childrenProvider);
