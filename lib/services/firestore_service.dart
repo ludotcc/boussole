@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/child_model.dart';
+import '../models/child_companion_profile.dart';
 import '../models/child_day_progress_model.dart';
 import '../models/day_exception_model.dart';
 import '../models/day_type_model.dart';
@@ -173,6 +174,9 @@ class FirestoreService {
           'firstName': child.firstName,
           'avatar': child.avatar,
           'age': child.age,
+          if (child.birthDate != null)
+            'birthDate': Timestamp.fromDate(child.birthDate!),
+          'companionProfile': child.companionProfile.toMap(),
           'profileType': child.profileType,
           'academyId': child.academyId,
           'weeklyRhythmByWeekday': {
@@ -205,7 +209,11 @@ class FirestoreService {
       familyId: familyId,
       firstName: data['firstName'] as String,
       avatar: data['avatar'] as String,
-      age: data['age'] as int,
+      birthDate: _firestoreDate(data['birthDate']),
+      age: (data['age'] as num?)?.toInt(),
+      companionProfile: ChildCompanionProfile.fromMap(
+        data['companionProfile'] as Map?,
+      ),
       profileType: data['profileType'] as String? ?? 'child',
       academyId: data['academyId'] as String? ?? defaultSchoolAcademyId,
       weeklyRhythmByWeekday: ChildModel.weeklyRhythmFromMap(
@@ -225,6 +233,9 @@ class FirestoreService {
           'firstName': child.firstName,
           'avatar': child.avatar,
           'age': child.age,
+          if (child.birthDate != null)
+            'birthDate': Timestamp.fromDate(child.birthDate!),
+          'companionProfile': child.companionProfile.toMap(),
           'profileType': child.profileType,
           'academyId': child.academyId,
           'weeklyRhythmByWeekday': {
@@ -262,7 +273,11 @@ class FirestoreService {
         familyId: familyId,
         firstName: data['firstName'] as String,
         avatar: data['avatar'] as String,
-        age: data['age'] as int,
+        birthDate: _firestoreDate(data['birthDate']),
+        age: (data['age'] as num?)?.toInt(),
+        companionProfile: ChildCompanionProfile.fromMap(
+          data['companionProfile'] as Map?,
+        ),
         profileType: data['profileType'] as String? ?? 'child',
         academyId: data['academyId'] as String? ?? defaultSchoolAcademyId,
         weeklyRhythmByWeekday: ChildModel.weeklyRhythmFromMap(
@@ -271,6 +286,13 @@ class FirestoreService {
         createdAt: (data['createdAt'] as Timestamp).toDate(),
       );
     }).toList();
+  }
+
+  DateTime? _firestoreDate(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 
   Future<ChildDayProgressModel?> getChildDayProgress({

@@ -3,6 +3,7 @@ import 'school_academy.dart';
 class ChildCreationModel {
   final String firstName;
   final int age;
+  final DateTime? birthDate;
   final String avatar;
   final String profileType;
   final String academyId;
@@ -11,6 +12,7 @@ class ChildCreationModel {
   const ChildCreationModel({
     required this.firstName,
     required this.age,
+    this.birthDate,
     required this.avatar,
     this.profileType = 'child',
     this.academyId = defaultSchoolAcademyId,
@@ -28,6 +30,7 @@ class ChildCreationModel {
   ChildCreationModel copyWith({
     String? firstName,
     int? age,
+    DateTime? birthDate,
     String? avatar,
     String? profileType,
     String? academyId,
@@ -36,6 +39,7 @@ class ChildCreationModel {
     return ChildCreationModel(
       firstName: firstName ?? this.firstName,
       age: age ?? this.age,
+      birthDate: birthDate ?? this.birthDate,
       avatar: avatar ?? this.avatar,
       profileType: profileType ?? this.profileType,
       academyId: academyId ?? this.academyId,

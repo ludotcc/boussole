@@ -1,6 +1,7 @@
 import '../core/constants/moment_presets.dart';
 import '../models/child_day_item_model.dart';
 import '../models/child_model.dart';
+import '../models/child_companion_profile.dart';
 import '../models/child_day_progress_model.dart';
 import '../models/day_exception_model.dart';
 import '../models/day_type_model.dart';
@@ -170,6 +171,9 @@ class FamilyRepository {
         firstName: firstName,
         avatar: avatar,
         age: age,
+        birthDate: existingChild?.birthDate,
+        companionProfile:
+            existingChild?.companionProfile ?? const ChildCompanionProfile(),
         profileType: profileType,
         academyId:
             existingChild?.academyId ??
@@ -417,6 +421,7 @@ class FamilyRepository {
     required String familyId,
     required String firstName,
     required int age,
+    DateTime? birthDate,
     required String avatar,
     String profileType = 'child',
     String? academyId,
@@ -428,6 +433,7 @@ class FamilyRepository {
       firstName: firstName,
       avatar: avatar,
       age: age,
+      birthDate: birthDate,
       profileType: profileType,
       academyId: academyId ?? defaultSchoolAcademyId,
       weeklyRhythmByWeekday:
@@ -470,6 +476,8 @@ class FamilyRepository {
         firstName: child.firstName,
         avatar: child.avatar,
         age: child.age,
+        birthDate: child.birthDate,
+        companionProfile: child.companionProfile,
         profileType: child.profileType,
         academyId: academyId ?? child.academyId,
         weeklyRhythmByWeekday: weeklyRhythmByWeekday,

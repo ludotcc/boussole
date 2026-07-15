@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'child_companion_profile.dart';
 import 'school_academy.dart';
 
 class ChildModel {
@@ -5,7 +8,9 @@ class ChildModel {
   final String familyId;
   final String firstName;
   final String avatar;
-  final int age;
+  final DateTime? birthDate;
+  final int? _legacyAge;
+  final ChildCompanionProfile companionProfile;
   final String profileType;
   final String academyId;
   final Map<int, String> weeklyRhythmByWeekday;
@@ -16,7 +21,9 @@ class ChildModel {
     required this.familyId,
     required this.firstName,
     required this.avatar,
-    required this.age,
+    this.birthDate,
+    int? age,
+    this.companionProfile = const ChildCompanionProfile(),
     this.profileType = 'child',
     this.academyId = defaultSchoolAcademyId,
     this.weeklyRhythmByWeekday = const {
@@ -29,7 +36,19 @@ class ChildModel {
       DateTime.sunday: 'weekend',
     },
     required this.createdAt,
-  });
+  }) : _legacyAge = age,
+       assert(birthDate != null || age != null);
+
+  int get age {
+    if (birthDate == null) return _legacyAge ?? 0;
+    final today = DateTime.now();
+    var result = today.year - birthDate!.year;
+    if (today.month < birthDate!.month ||
+        (today.month == birthDate!.month && today.day < birthDate!.day)) {
+      result--;
+    }
+    return result;
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -38,6 +57,8 @@ class ChildModel {
       'firstName': firstName,
       'avatar': avatar,
       'age': age,
+      if (birthDate != null) 'birthDate': birthDate!.toIso8601String(),
+      'companionProfile': companionProfile.toMap(),
       'profileType': profileType,
       'academyId': academyId,
       'weeklyRhythmByWeekday': {
@@ -54,7 +75,11 @@ class ChildModel {
       familyId: map['familyId'] as String,
       firstName: map['firstName'] as String,
       avatar: map['avatar'] as String,
-      age: map['age'] as int,
+      birthDate: _dateFromValue(map['birthDate']),
+      age: (map['age'] as num?)?.toInt(),
+      companionProfile: ChildCompanionProfile.fromMap(
+        map['companionProfile'] as Map?,
+      ),
       profileType: map['profileType'] as String? ?? 'child',
       academyId: map['academyId'] as String? ?? defaultSchoolAcademyId,
       weeklyRhythmByWeekday: weeklyRhythmFromMap(
@@ -62,6 +87,13 @@ class ChildModel {
       ),
       createdAt: DateTime.parse(map['createdAt'] as String),
     );
+  }
+
+  static DateTime? _dateFromValue(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 
   static Map<int, String> weeklyRhythmFromMap(Map? map) {

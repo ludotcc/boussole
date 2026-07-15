@@ -11,13 +11,23 @@ class ChildCreationNotifier extends StateNotifier<ChildCreationModel?> {
     state = ChildCreationModel(firstName: '', age: 0, avatar: avatar);
   }
 
-  void createDraft({required String firstName, required int age}) {
-    state = ChildCreationModel(firstName: firstName, age: age, avatar: '');
+  void createDraft({
+    required String firstName,
+    required int age,
+    DateTime? birthDate,
+  }) {
+    state = ChildCreationModel(
+      firstName: firstName,
+      age: age,
+      birthDate: birthDate,
+      avatar: '',
+    );
   }
 
   void updateInfo({
     required String firstName,
     required int age,
+    DateTime? birthDate,
     required String profileType,
   }) {
     if (state == null) return;
@@ -25,6 +35,7 @@ class ChildCreationNotifier extends StateNotifier<ChildCreationModel?> {
     state = state!.copyWith(
       firstName: firstName,
       age: age,
+      birthDate: birthDate,
       profileType: profileType,
     );
   }
@@ -63,6 +74,7 @@ class ChildRegistrationNotifier extends FamilyActionNotifier {
   Future<void> createChildProfile({
     required String firstName,
     required int age,
+    DateTime? birthDate,
     required String avatar,
     required String profileType,
     String? academyId,
@@ -79,6 +91,7 @@ class ChildRegistrationNotifier extends FamilyActionNotifier {
             familyId: familyId,
             firstName: firstName.trim(),
             age: age,
+            birthDate: birthDate,
             avatar: avatar,
             profileType: profileType,
             academyId: academyId,
@@ -107,6 +120,7 @@ class ChildRegistrationNotifier extends FamilyActionNotifier {
             familyId: familyId,
             firstName: draft.firstName,
             age: draft.age,
+            birthDate: draft.birthDate,
             avatar: draft.avatar,
             profileType: draft.profileType,
             academyId: draft.academyId,
