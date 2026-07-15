@@ -25,6 +25,7 @@ class Celebration {
     this.status = CelebrationStatus.pending,
     this.shardReward = 0,
     this.deliveredAt,
+    this.rewardDeliveredAt,
   });
 
   final String id;
@@ -35,6 +36,10 @@ class Celebration {
   final CelebrationStatus status;
   final int shardReward;
   final DateTime? deliveredAt;
+  final DateTime? rewardDeliveredAt;
+
+  bool shouldCreditReward({required bool ledgerExists}) =>
+      status == CelebrationStatus.pending && shardReward > 0 && !ledgerExists;
 
   factory Celebration.parentCreated({
     required String id,
@@ -42,14 +47,14 @@ class Celebration {
     required CelebrationType type,
     required String parentId,
     required DateTime createdAt,
-    required bool givesShard,
+    required int shardReward,
   }) => Celebration(
     id: id,
     childId: childId,
     type: type,
     createdByParentId: parentId,
     createdAt: createdAt,
-    shardReward: givesShard ? 1 : 0,
+    shardReward: shardReward.clamp(0, 5),
   );
 
   Map<String, dynamic> toMap() => {
@@ -62,6 +67,9 @@ class Celebration {
     'deliveredAt': deliveredAt == null
         ? null
         : Timestamp.fromDate(deliveredAt!),
+    'rewardDeliveredAt': rewardDeliveredAt == null
+        ? null
+        : Timestamp.fromDate(rewardDeliveredAt!),
   };
 
   factory Celebration.fromMap(String id, Map<String, dynamic> map) {
@@ -81,9 +89,12 @@ class Celebration {
         (value) => value.name == map['status'],
         orElse: () => CelebrationStatus.pending,
       ),
-      shardReward: ((map['shardReward'] as num?) ?? 0).toInt(),
+      shardReward: ((map['shardReward'] as num?) ?? 0).toInt().clamp(0, 5),
       deliveredAt: map['deliveredAt'] is Timestamp
           ? (map['deliveredAt'] as Timestamp).toDate()
+          : null,
+      rewardDeliveredAt: map['rewardDeliveredAt'] is Timestamp
+          ? (map['rewardDeliveredAt'] as Timestamp).toDate()
           : null,
     );
   }

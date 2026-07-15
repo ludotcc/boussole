@@ -5,13 +5,14 @@ import '../models/companion_moment.dart';
 import '../models/companion_suggestion_result.dart';
 
 class CompanionBrainService {
-  const CompanionBrainService({this.catalog = companionMomentsCatalog});
+  const CompanionBrainService({this.catalog});
 
-  final List<CompanionMoment> catalog;
+  final List<CompanionMoment>? catalog;
+  List<CompanionMoment> get _moments => catalog ?? companionMomentsCatalog;
 
   CompanionSuggestionResult selectIdeas(CompanionContext context) {
-    final candidates =
-        catalog
+    var candidates =
+        _moments
             .where((moment) => _isCompatible(moment, context))
             .map((moment) => _RankedMoment(moment, _score(moment, context)))
             .toList()
@@ -20,6 +21,29 @@ class CompanionBrainService {
             return score != 0 ? score : a.moment.id.compareTo(b.moment.id);
           });
 
+    if (candidates.isEmpty) {
+      candidates =
+          _moments
+              .where((moment) => _isGenericFallbackCompatible(moment, context))
+              .map((moment) => _RankedMoment(moment, _score(moment, context)))
+              .toList()
+            ..sort((a, b) => a.moment.id.compareTo(b.moment.id));
+    }
+
+    final recentIds = context.recentMomentIds.toSet();
+    final fresh = candidates.where(
+      (candidate) => !recentIds.contains(candidate.moment.id),
+    );
+    final recycled = candidates.where(
+      (candidate) => recentIds.contains(candidate.moment.id),
+    );
+    final selected = _selectVaried([...fresh, ...recycled]);
+    _avoidPreviousGroup(selected, candidates, context.previousGroupIds);
+
+    return CompanionSuggestionResult(ideas: selected);
+  }
+
+  List<CompanionMoment> _selectVaried(List<_RankedMoment> candidates) {
     final selected = <CompanionMoment>[];
     final selectedFamilies = <CompanionMomentFamily>{};
     for (final candidate in candidates) {
@@ -36,8 +60,36 @@ class CompanionBrainService {
         }
       }
     }
+    return selected;
+  }
 
-    return CompanionSuggestionResult(ideas: selected);
+  void _avoidPreviousGroup(
+    List<CompanionMoment> selected,
+    List<_RankedMoment> candidates,
+    List<String> previousGroupIds,
+  ) {
+    if (selected.isEmpty ||
+        !_sameIds(selected.map((idea) => idea.id), previousGroupIds)) {
+      return;
+    }
+    final selectedIds = selected.map((idea) => idea.id).toSet();
+    for (final candidate in candidates) {
+      if (!selectedIds.contains(candidate.moment.id)) {
+        selected[selected.length - 1] = candidate.moment;
+        return;
+      }
+    }
+    if (selected.length > 1) {
+      selected.removeLast();
+    }
+  }
+
+  bool _sameIds(Iterable<String> selected, List<String> previous) {
+    final values = selected.toList();
+    return values.length == previous.length &&
+        values.asMap().entries.every(
+          (entry) => entry.value == previous[entry.key],
+        );
   }
 
   bool _isCompatible(CompanionMoment moment, CompanionContext context) {
@@ -50,7 +102,7 @@ class CompanionBrainService {
         !moment.compatibleMainMoments.contains(context.mainMoment)) {
       return false;
     }
-    if (moment.primaryNeed != context.primaryNeed) return false;
+    if (!_matchesNeed(moment.primaryNeed, context.primaryNeed)) return false;
     if (context.child.age < moment.minimumAge ||
         context.child.age > moment.maximumAge) {
       return false;
@@ -78,9 +130,39 @@ class CompanionBrainService {
     return true;
   }
 
+  bool _matchesNeed(CompanionNeed momentNeed, CompanionNeed requestedNeed) {
+    if (requestedNeed != CompanionNeed.findIdea) {
+      return momentNeed == requestedNeed;
+    }
+    return momentNeed != CompanionNeed.calmDown &&
+        momentNeed != CompanionNeed.rest &&
+        momentNeed != CompanionNeed.celebrate;
+  }
+
+  bool _isGenericFallbackCompatible(
+    CompanionMoment moment,
+    CompanionContext context,
+  ) {
+    if (!moment.tags.contains('generic-safe') ||
+        !moment.active ||
+        !moment.isSafe) {
+      return false;
+    }
+    if (context.child.age < moment.minimumAge ||
+        context.child.age > moment.maximumAge ||
+        moment.durationMinutes > context.availableDurationMinutes ||
+        !context.availableParticipants.contains(moment.participants) ||
+        !context.availableMaterials.containsAll(moment.requiredMaterials)) {
+      return false;
+    }
+    return moment.compatibleContexts.isEmpty ||
+        _intersects(moment.compatibleContexts, context.availableContexts);
+  }
+
   int _score(CompanionMoment moment, CompanionContext context) {
     final profile = context.child.companionProfile;
     var score = 0;
+    if (moment.primaryNeed == context.primaryNeed) score += 4;
     score += _matches(moment.compatibleInterests, profile.interests) * 8;
     score += _matches(moment.tags, profile.likedActivities) * 10;
     score += _matches(moment.compatibleParentGoals, profile.parentGoals) * 6;

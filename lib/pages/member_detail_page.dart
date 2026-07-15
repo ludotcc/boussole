@@ -16,6 +16,7 @@ import '../widgets/avatar/avatar_grid.dart';
 import '../widgets/boussole_button.dart';
 import '../widgets/common/app_card.dart';
 import '../widgets/family/companion_profile_sections.dart';
+import '../widgets/family/parent_rewards_section.dart';
 
 class MemberDetailPage extends ConsumerStatefulWidget {
   const MemberDetailPage({super.key, required this.member});
@@ -305,34 +306,6 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
                     setState(() => _companionProfile = profile),
               ),
               const SizedBox(height: 20),
-              AppCard(
-                child: Column(
-                  children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.psychology_alt_rounded),
-                      title: const Text('Mémoires du Compagnon'),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () => context.push(
-                        '/parent/companion-memories',
-                        extra: widget.member,
-                      ),
-                    ),
-                    const Divider(),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.celebration_rounded),
-                      title: const Text('Célébrations'),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () => context.push(
-                        '/parent/celebrations',
-                        extra: widget.member,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
               _AcademySection(
                 academyId: _academyId,
                 academies: academiesAsync.valueOrNull ?? _fallbackAcademies,
@@ -353,6 +326,8 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
                   });
                 },
               ),
+              const SizedBox(height: 20),
+              ParentRewardsSection(child: widget.member, allowEditing: true),
               const SizedBox(height: 20),
             ],
             if (isLoading)

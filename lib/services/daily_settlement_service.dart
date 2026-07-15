@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/daily_light_summary.dart';
 import '../models/daily_settlement.dart';
-import '../models/shard_transaction.dart';
-import '../repositories/rewards_repository.dart';
 
 class DailySettlementService {
   DailySettlementService({FirebaseFirestore? firestore})
@@ -86,38 +84,15 @@ class DailySettlementService {
   }) {
     final childRef = _child(familyId, summary.childId);
     final dateKey = _dateKey(summary.date);
-    final ledgerRef = childRef
-        .collection('reward_ledger')
-        .doc(RewardsRepository.daySourceKey(summary.date));
-    final walletRef = childRef.collection('economy').doc('state');
     final settlementRef = childRef.collection('daily_settlements').doc(dateKey);
     return _firestore.runTransaction((transaction) async {
-      if ((await transaction.get(ledgerRef)).exists) return null;
-      final wallet = await transaction.get(walletRef);
-      final balance = ((wallet.data()?['balance'] as num?) ?? 0).toInt();
+      if ((await transaction.get(settlementRef)).exists) return null;
       final now = DateTime.now();
-      final total = progressReward + gentleSupportBonus;
-      transaction.set(walletRef, {
-        'balance': balance + total,
-        'updatedAt': Timestamp.fromDate(now),
-      });
-      transaction.set(
-        ledgerRef,
-        ShardTransaction(
-          id: ledgerRef.id,
-          childId: summary.childId,
-          type: ShardTransactionType.credit,
-          source: ShardTransactionSource.dayCompletion,
-          amount: total,
-          sourceKey: ledgerRef.id,
-          createdAt: now,
-        ).toMap(),
-      );
       transaction.set(settlementRef, {
         ...summary.toMap(),
-        'progressReward': progressReward,
-        'gentleSupportBonus': gentleSupportBonus,
-        'totalReward': total,
+        'progressReward': 0,
+        'gentleSupportBonus': 0,
+        'totalReward': 0,
         'gentleEventIds': gentleEventIds,
         'settledAt': Timestamp.fromDate(now),
       });
@@ -126,9 +101,9 @@ class DailySettlementService {
         date: summary.date,
         completedItems: summary.completedItems,
         totalItems: summary.totalItems,
-        progressReward: progressReward,
-        gentleSupportBonus: gentleSupportBonus,
-        totalReward: total,
+        progressReward: 0,
+        gentleSupportBonus: 0,
+        totalReward: 0,
         settledAt: now,
         gentleEventIds: gentleEventIds,
       );

@@ -42,17 +42,6 @@ class CompanionService {
     required ChildCompanionProfile profile,
   }) => _child(familyId, childId).update({'companionProfile': profile.toMap()});
 
-  String generateMemoryId(String familyId, String childId) =>
-      _memories(familyId, childId).doc().id;
-
-  Future<void> saveMemory({
-    required String familyId,
-    required CompanionMemory memory,
-  }) => _memories(
-    familyId,
-    memory.childId,
-  ).doc(memory.id).set(memory.toMap(), SetOptions(merge: true));
-
   Future<List<CompanionMemory>> getMemories({
     required String familyId,
     required String childId,
@@ -93,55 +82,15 @@ class CompanionService {
   String generateCelebrationId(String familyId, String childId) =>
       _celebrations(familyId, childId).doc().id;
 
-  Future<void> saveCelebration({
-    required String familyId,
-    required Celebration celebration,
-  }) => _celebrations(
-    familyId,
-    celebration.childId,
-  ).doc(celebration.id).set(celebration.toMap(), SetOptions(merge: true));
-
   Future<void> createParentCelebration({
     required String familyId,
     required Celebration celebration,
   }) {
-    final childReference = _child(familyId, celebration.childId);
     final celebrationReference = _celebrations(
       familyId,
       celebration.childId,
     ).doc(celebration.id);
-    if (celebration.shardReward == 0) {
-      return celebrationReference.set(celebration.toMap());
-    }
-    final walletReference = childReference.collection('economy').doc('state');
-    final sourceKey = 'celebration_${celebration.id}';
-    final ledgerReference = childReference
-        .collection('reward_ledger')
-        .doc(sourceKey);
-    return _firestore.runTransaction((transaction) async {
-      final ledgerSnapshot = await transaction.get(ledgerReference);
-      if (ledgerSnapshot.exists) return;
-      final walletSnapshot = await transaction.get(walletReference);
-      final balance = ((walletSnapshot.data()?['balance'] as num?) ?? 0)
-          .toInt();
-      transaction.set(celebrationReference, celebration.toMap());
-      transaction.set(walletReference, {
-        'balance': balance + celebration.shardReward,
-        'updatedAt': Timestamp.fromDate(celebration.createdAt),
-      });
-      transaction.set(
-        ledgerReference,
-        ShardTransaction(
-          id: sourceKey,
-          childId: celebration.childId,
-          type: ShardTransactionType.credit,
-          source: ShardTransactionSource.celebration,
-          amount: celebration.shardReward,
-          sourceKey: sourceKey,
-          createdAt: celebration.createdAt,
-        ).toMap(),
-      );
-    });
+    return celebrationReference.set(celebration.toMap());
   }
 
   Future<List<Celebration>> getCelebrations({
@@ -155,6 +104,60 @@ class CompanionService {
     return snapshot.docs
         .map((doc) => Celebration.fromMap(doc.id, doc.data()))
         .toList();
+  }
+
+  Future<void> markCelebrationDelivered({
+    required String familyId,
+    required String childId,
+    required String celebrationId,
+  }) {
+    final reference = _celebrations(familyId, childId).doc(celebrationId);
+    final childReference = _child(familyId, childId);
+    final walletReference = childReference.collection('economy').doc('state');
+    final sourceKey = 'celebration_$celebrationId';
+    final ledgerReference = childReference
+        .collection('reward_ledger')
+        .doc(sourceKey);
+    return _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(reference);
+      if (!snapshot.exists) return;
+      final celebration = Celebration.fromMap(snapshot.id, snapshot.data()!);
+      if (celebration.status != CelebrationStatus.pending) return;
+      final now = DateTime.now();
+      final updates = <String, dynamic>{
+        'status': CelebrationStatus.delivered.name,
+        'deliveredAt': Timestamp.fromDate(now),
+      };
+      if (celebration.shardReward > 0) {
+        final safeReward = celebration.shardReward.clamp(0, 5);
+        final ledgerSnapshot = await transaction.get(ledgerReference);
+        if (celebration.shouldCreditReward(
+          ledgerExists: ledgerSnapshot.exists,
+        )) {
+          final walletSnapshot = await transaction.get(walletReference);
+          final balance = ((walletSnapshot.data()?['balance'] as num?) ?? 0)
+              .toInt();
+          transaction.set(walletReference, {
+            'balance': balance + safeReward,
+            'updatedAt': Timestamp.fromDate(now),
+          });
+          transaction.set(
+            ledgerReference,
+            ShardTransaction(
+              id: sourceKey,
+              childId: childId,
+              type: ShardTransactionType.credit,
+              source: ShardTransactionSource.celebration,
+              amount: safeReward,
+              sourceKey: sourceKey,
+              createdAt: now,
+            ).toMap(),
+          );
+        }
+        updates['rewardDeliveredAt'] = Timestamp.fromDate(now);
+      }
+      transaction.update(reference, updates);
+    });
   }
 
   String generateObservationId(String familyId, String childId) =>

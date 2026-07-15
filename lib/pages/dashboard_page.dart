@@ -9,6 +9,7 @@ import '../models/child_model.dart';
 import '../models/family_event_model.dart';
 import '../models/family_member_model.dart';
 import '../providers/children_provider.dart';
+import '../providers/companion_provider.dart';
 import '../providers/dashboard_refresh_provider.dart';
 import '../providers/family_events_provider.dart';
 import '../providers/family_members_provider.dart';
@@ -16,6 +17,8 @@ import '../providers/family_provider.dart';
 import '../providers/session_provider.dart';
 import '../widgets/common/avatar_circle.dart';
 import '../widgets/family/family_event_style.dart';
+
+const parentCompanionCardTitle = 'Compagnon';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -185,6 +188,8 @@ class _QuickAccessSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final membersAsync = ref.watch(familyMembersProvider);
+    final attentionCount =
+        ref.watch(parentAttentionCountProvider).valueOrNull ?? 0;
 
     return membersAsync.when(
       loading: () => Column(
@@ -220,11 +225,12 @@ class _QuickAccessSection extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             _DashboardImageCard(
-              title: 'Missions à valider',
-              subtitle: 'Reconnaître les beaux moments',
+              title: parentCompanionCardTitle,
+              subtitle: 'Missions, mémoires et célébrations',
               imagePath: 'assets/images/objects/page_planning.png',
               color: AppColors.primary,
               onTap: () => context.push('/parent/mission-validations'),
+              attentionCount: attentionCount,
             ),
             if (papa != null) ...[
               const SizedBox(height: 16),
@@ -604,6 +610,7 @@ class _DashboardImageCard extends StatelessWidget {
     required this.color,
     required this.onTap,
     this.compactImage = false,
+    this.attentionCount = 0,
   });
 
   final String title;
@@ -612,6 +619,7 @@ class _DashboardImageCard extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
   final bool compactImage;
+  final int attentionCount;
 
   @override
   Widget build(BuildContext context) {
@@ -677,6 +685,27 @@ class _DashboardImageCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
+              if (attentionCount > 0) ...[
+                Container(
+                  key: const ValueKey('parent-attention-badge'),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Text(
+                    '$attentionCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 color: color.withValues(alpha: .68),

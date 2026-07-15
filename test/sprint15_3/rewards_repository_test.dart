@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:boussole/models/inventory_entry.dart';
+import 'package:boussole/models/parent_reward.dart';
+import 'package:boussole/models/reward_announcement.dart';
 import 'package:boussole/models/shard_transaction.dart';
 import 'package:boussole/models/shard_wallet.dart';
 import 'package:boussole/repositories/rewards_repository.dart';
@@ -8,7 +10,7 @@ import 'package:boussole/services/rewards_service.dart';
 
 void main() {
   group('récompense de journée', () {
-    test('utilise une clé déterministe et ne crédite qu’une fois', () async {
+    test('la fin de journée ne crédite jamais le portefeuille', () async {
       final service = _FakeRewardsService(balance: 0);
       final repository = RewardsRepository(service: service);
       final date = DateTime(2026, 7, 14);
@@ -20,7 +22,7 @@ void main() {
           childId: 'child',
           date: date,
         ),
-        CreditResult.credited,
+        CreditResult.alreadyCredited,
       );
       expect(
         await repository.rewardDayCompletion(
@@ -30,7 +32,8 @@ void main() {
         ),
         CreditResult.alreadyCredited,
       );
-      expect(service.balance, RewardsRepository.dayCompletionAmount);
+      expect(service.balance, 0);
+      expect(service.ledger, isEmpty);
     });
 
     test('une remise à zéro de progression ne touche pas le ledger', () async {
@@ -53,7 +56,7 @@ void main() {
         ),
         CreditResult.alreadyCredited,
       );
-      expect(service.balance, 25);
+      expect(service.balance, 5);
     });
   });
 
@@ -120,6 +123,52 @@ class _FakeRewardsService implements RewardsService {
   int? lastPrice;
   final Set<String> ledger = {};
   final Set<String> inventory = {};
+
+  @override
+  String generateParentRewardId(String familyId, String childId) => 'reward';
+
+  @override
+  String generateRedemptionId(String familyId, String childId) => 'redemption';
+
+  @override
+  Future<List<ParentReward>> getParentRewards({
+    required String familyId,
+    required String childId,
+  }) async => [];
+
+  @override
+  Future<void> saveParentReward({
+    required String familyId,
+    required ParentReward reward,
+  }) async {}
+
+  @override
+  Future<void> deleteParentReward({
+    required String familyId,
+    required String childId,
+    required String rewardId,
+  }) async {}
+
+  @override
+  Future<ParentRewardRedemptionResult> redeemParentReward({
+    required String familyId,
+    required String childId,
+    required String rewardId,
+    required String redemptionId,
+  }) async => ParentRewardRedemptionResult.redeemed;
+
+  @override
+  Future<List<RewardAnnouncement>> getPendingRewardAnnouncements({
+    required String familyId,
+    required String childId,
+  }) async => [];
+
+  @override
+  Future<void> markRewardAnnouncementDelivered({
+    required String familyId,
+    required String childId,
+    required String announcementId,
+  }) async {}
 
   @override
   Future<CreditResult> creditOnce({

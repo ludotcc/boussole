@@ -63,23 +63,21 @@ void main() {
       expect(notifier.state.pose, GuardianPose.idle);
     });
 
-    test('reste sleeping pendant la nuit configurable', () async {
-      var now = DateTime(2026, 7, 14, 21);
-      final notifier = GuardianExperienceNotifier(
-        guardianId: GuardianId.wave,
-        now: () => now,
-        nightHour: 21,
-        transientDuration: const Duration(milliseconds: 10),
-      );
-      addTearDown(notifier.dispose);
-
-      expect(notifier.state.pose, GuardianPose.sleeping);
-      notifier.talk();
-      expect(notifier.state.pose, GuardianPose.sleeping);
-      now = DateTime(2026, 7, 15, 8);
-      notifier.refreshForCurrentTime();
-      expect(notifier.state.pose, GuardianPose.idle);
-    });
+    for (final entry in {
+      DateTime(2026, 7, 14, 23, 59): GuardianPose.welcome,
+      DateTime(2026, 7, 15, 0): GuardianPose.sleeping,
+      DateTime(2026, 7, 15, 4, 59): GuardianPose.sleeping,
+      DateTime(2026, 7, 15, 5): GuardianPose.welcome,
+    }.entries) {
+      test('état du Compagnon à ${entry.key.hour}:${entry.key.minute}', () {
+        final notifier = GuardianExperienceNotifier(
+          guardianId: GuardianId.wave,
+          now: () => entry.key,
+        );
+        addTearDown(notifier.dispose);
+        expect(notifier.state.pose, entry.value);
+      });
+    }
 
     test('encourage et rassure avec les poses dédiées', () {
       final notifier = GuardianExperienceNotifier(

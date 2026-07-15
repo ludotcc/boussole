@@ -24,10 +24,7 @@ const guardianDialogues = <GuardianId, Map<GuardianPose, List<String>>>{
       'Tu peux être fier de toi.',
     ],
     GuardianPose.sleeping: ['Bonne nuit.', 'À demain, repose-toi bien.'],
-    GuardianPose.choices: [
-      'Que souhaites-tu faire ?',
-      'Choisis ton prochain petit pas.',
-    ],
+    GuardianPose.choices: [''],
     GuardianPose.idle: ['Je suis là si tu as besoin de moi.'],
   },
   GuardianId.pixel: {
@@ -55,10 +52,7 @@ const guardianDialogues = <GuardianId, Map<GuardianPose, List<String>>>{
       'Bonne nuit, petit inventeur.',
       'Les idées se reposent aussi.',
     ],
-    GuardianPose.choices: [
-      'Quelle idée choisissons-nous ?',
-      'Vers quelle aventure allons-nous ?',
-    ],
+    GuardianPose.choices: [''],
     GuardianPose.idle: ['Je prépare une nouvelle idée.'],
   },
   GuardianId.pyro: {
@@ -83,10 +77,7 @@ const guardianDialogues = <GuardianId, Map<GuardianPose, List<String>>>{
       'Bonne nuit, repose tes forces.',
       'À demain, courageux compagnon.',
     ],
-    GuardianPose.choices: [
-      'Quelle aventure choisis-tu ?',
-      'Quel sera ton prochain pas ?',
-    ],
+    GuardianPose.choices: [''],
     GuardianPose.idle: ['Je veille tranquillement.'],
   },
   GuardianId.gear: {
@@ -114,10 +105,7 @@ const guardianDialogues = <GuardianId, Map<GuardianPose, List<String>>>{
       'Bonne nuit, tout peut attendre demain.',
       'Les rouages se reposent.',
     ],
-    GuardianPose.choices: [
-      'Quel repère veux-tu ouvrir ?',
-      'Par quoi souhaites-tu commencer ?',
-    ],
+    GuardianPose.choices: [''],
     GuardianPose.idle: ['Je range quelques idées.'],
   },
   GuardianId.wave: {
@@ -145,10 +133,7 @@ const guardianDialogues = <GuardianId, Map<GuardianPose, List<String>>>{
       'Bonne nuit, fais de doux rêves.',
       'Repose-toi bien, à demain.',
     ],
-    GuardianPose.choices: [
-      'Qu’aimerais-tu faire maintenant ?',
-      'Quel chemin te ferait plaisir ?',
-    ],
+    GuardianPose.choices: [''],
     GuardianPose.idle: ['Je profite du calme de la Maison.'],
   },
 };

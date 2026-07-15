@@ -38,6 +38,8 @@ class SecretMission {
     this.guardianId,
     this.validatedAt,
     this.validatedBy,
+    this.announcementDeliveredAt,
+    this.announcementPending = false,
   });
   final String id;
   final String childId;
@@ -54,9 +56,15 @@ class SecretMission {
   final String? guardianId;
   final DateTime? validatedAt;
   final String? validatedBy;
+  final DateTime? announcementDeliveredAt;
+  final bool announcementPending;
 
   bool get isExpired => expiresAt.isBefore(DateTime.now());
   bool get isPending => status == SecretMissionStatus.awaitingParentValidation;
+  bool get hasPendingAnnouncement =>
+      announcementPending &&
+      status == SecretMissionStatus.validated &&
+      announcementDeliveredAt == null;
 
   Map<String, dynamic> toMap() => {
     'id': id,
@@ -76,6 +84,10 @@ class SecretMission {
         ? null
         : Timestamp.fromDate(validatedAt!),
     'validatedBy': validatedBy,
+    'announcementDeliveredAt': announcementDeliveredAt == null
+        ? null
+        : Timestamp.fromDate(announcementDeliveredAt!),
+    'announcementPending': announcementPending,
   };
 
   factory SecretMission.fromMap(String id, Map<String, dynamic> map) {
@@ -102,13 +114,17 @@ class SecretMission {
         (v) => v.name == map['origin'],
         orElse: () => SecretMissionOrigin.automatic,
       ),
-      reward: ((map['reward'] as num?) ?? 5).toInt().clamp(5, 15),
+      reward: ((map['reward'] as num?) ?? 1).toInt().clamp(0, 1),
       idempotencyKey: map['idempotencyKey'] as String? ?? 'mission_$id',
       guardianId: map['guardianId'] as String?,
       validatedAt: map['validatedAt'] is Timestamp
           ? (map['validatedAt'] as Timestamp).toDate()
           : null,
       validatedBy: map['validatedBy'] as String?,
+      announcementDeliveredAt: map['announcementDeliveredAt'] is Timestamp
+          ? (map['announcementDeliveredAt'] as Timestamp).toDate()
+          : null,
+      announcementPending: map['announcementPending'] as bool? ?? false,
     );
   }
 }

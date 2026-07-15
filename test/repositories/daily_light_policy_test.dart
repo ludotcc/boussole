@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:boussole/repositories/daily_settlement_repository.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   const policy = DailyLightPolicy();
@@ -23,22 +23,16 @@ void main() {
     expect(summary.ratio, .5);
   });
 
-  test('applique tous les seuils du barème', () {
+  test('récompense uniquement une journée complète, au maximum à 5', () {
     expect(policy.calculateDailyShardReward(0), 0);
-    expect(policy.calculateDailyShardReward(.24), 0);
-    expect(policy.calculateDailyShardReward(.25), 5);
-    expect(policy.calculateDailyShardReward(.49), 5);
-    expect(policy.calculateDailyShardReward(.50), 10);
-    expect(policy.calculateDailyShardReward(.74), 10);
-    expect(policy.calculateDailyShardReward(.75), 18);
-    expect(policy.calculateDailyShardReward(.99), 18);
-    expect(policy.calculateDailyShardReward(1), 25);
+    expect(policy.calculateDailyShardReward(.99), 0);
+    expect(policy.calculateDailyShardReward(1), 5);
+    expect(policy.calculateDailyShardReward(2), 5);
   });
 
-  test('plafonne le bonus doux à six Éclats', () {
+  test('plafonne le bonus exceptionnel à un Éclat', () {
     expect(policy.calculateGentleSupportBonus(0), 0);
-    expect(policy.calculateGentleSupportBonus(1), 3);
-    expect(policy.calculateGentleSupportBonus(2), 6);
-    expect(policy.calculateGentleSupportBonus(4), 6);
+    expect(policy.calculateGentleSupportBonus(1), 1);
+    expect(policy.calculateGentleSupportBonus(4), 1);
   });
 }

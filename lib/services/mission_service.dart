@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/secret_mission.dart';
-import '../models/shard_transaction.dart';
 import '../models/shared_moment.dart';
 
 enum MissionValidationResult { validated, alreadyProcessed, expired }
@@ -80,14 +79,6 @@ class MissionService {
     required String iconId,
   }) {
     final missionRef = _missions(familyId, childId).doc(missionId);
-    final walletRef = _child(
-      familyId,
-      childId,
-    ).collection('economy').doc('state');
-    final ledgerRef = _child(
-      familyId,
-      childId,
-    ).collection('reward_ledger').doc('mission_$missionId');
     final momentRef = _moments(familyId, childId).doc(missionId);
     return _firestore.runTransaction((transaction) async {
       final missionSnapshot = await transaction.get(missionRef);
@@ -105,13 +96,6 @@ class MissionService {
         return MissionValidationResult.expired;
       }
       if (!mission.isPending) return MissionValidationResult.alreadyProcessed;
-      final ledgerSnapshot = await transaction.get(ledgerRef);
-      final walletSnapshot = await transaction.get(walletRef);
-      if (ledgerSnapshot.exists) {
-        return MissionValidationResult.alreadyProcessed;
-      }
-      final balance = ((walletSnapshot.data()?['balance'] as num?) ?? 0)
-          .toInt();
       final now = DateTime.now();
       final moment = SharedMoment(
         id: mission.id,
@@ -130,25 +114,29 @@ class MissionService {
         'status': SecretMissionStatus.validated.name,
         'validatedAt': Timestamp.fromDate(now),
         'validatedBy': parentId,
+        'announcementDeliveredAt': null,
+        'announcementPending': true,
       });
-      transaction.set(walletRef, {
-        'balance': balance + reward,
-        'updatedAt': Timestamp.fromDate(now),
-      });
-      transaction.set(
-        ledgerRef,
-        ShardTransaction(
-          id: 'mission_$missionId',
-          childId: childId,
-          type: ShardTransactionType.credit,
-          source: ShardTransactionSource.secretMissionValidation,
-          amount: reward,
-          sourceKey: 'mission_$missionId',
-          createdAt: now,
-        ).toMap(),
-      );
       transaction.set(momentRef, moment.toMap());
       return MissionValidationResult.validated;
+    });
+  }
+
+  Future<void> markAnnouncementDelivered({
+    required String familyId,
+    required String childId,
+    required String missionId,
+  }) {
+    final missionRef = _missions(familyId, childId).doc(missionId);
+    return _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(missionRef);
+      if (!snapshot.exists) return;
+      final mission = SecretMission.fromMap(snapshot.id, snapshot.data()!);
+      if (!mission.hasPendingAnnouncement) return;
+      transaction.update(missionRef, {
+        'announcementDeliveredAt': Timestamp.fromDate(DateTime.now()),
+        'announcementPending': false,
+      });
     });
   }
 

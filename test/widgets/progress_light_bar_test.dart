@@ -21,7 +21,15 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Ma Lumière'), findsOneWidget);
+    expect(find.text('Ma\nLumière'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('daily-progress-right-rail')),
+      findsOneWidget,
+    );
+    final rail = tester.getSize(
+      find.byKey(const ValueKey('daily-progress-right-rail')),
+    );
+    expect(rail.width, closeTo(54 * .98, .01));
     final indicator = tester.widget<LinearProgressIndicator>(
       find.byType(LinearProgressIndicator),
     );

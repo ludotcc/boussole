@@ -3,22 +3,93 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/celebration.dart';
 import '../models/child_companion_profile.dart';
 import '../models/child_model.dart';
+import '../models/companion_child_experience.dart';
 import '../models/companion_context.dart';
 import '../models/companion_memory.dart';
-import '../models/companion_moment.dart';
 import '../models/companion_observation.dart';
 import '../models/companion_suggestion_result.dart';
+import '../models/companion_suggestion_request.dart';
 import '../models/planning_day_kind.dart';
-import '../models/routine_model.dart';
 import '../repositories/companion_repository.dart';
+import '../services/companion_context_policy.dart';
+import '../services/companion_dialogue_service.dart';
 import 'children_provider.dart';
 import 'family_provider.dart';
+import 'moments_provider.dart';
+import 'mission_provider.dart';
 import 'rewards_provider.dart';
 import 'session_provider.dart';
 
 final companionRepositoryProvider = Provider<CompanionRepository>(
   (_) => CompanionRepository(),
 );
+
+final companionContextPolicyProvider = Provider<CompanionContextPolicy>(
+  (_) => const CompanionContextPolicy(),
+);
+
+final companionDialogueServiceProvider = Provider<CompanionDialogueService>(
+  (_) => const CompanionDialogueService(),
+);
+
+final companionContextClockProvider = StreamProvider<DateTime>((ref) async* {
+  while (true) {
+    final now = DateTime.now();
+    yield now;
+    final nextHour = DateTime(now.year, now.month, now.day, now.hour + 1);
+    await Future<void>.delayed(nextHour.difference(now));
+  }
+});
+
+class CompanionIdeaSessionState {
+  const CompanionIdeaSessionState({
+    this.recentMomentIds = const [],
+    this.previousGroupIds = const [],
+  });
+
+  final List<String> recentMomentIds;
+  final List<String> previousGroupIds;
+}
+
+class CompanionIdeaSessionNotifier
+    extends StateNotifier<CompanionIdeaSessionState> {
+  CompanionIdeaSessionNotifier(this.ref, this.childId)
+    : super(const CompanionIdeaSessionState());
+
+  final Ref ref;
+  final String childId;
+
+  void recordDisplayed(List<String> ids) {
+    if (ids.isEmpty) return;
+    state = CompanionIdeaSessionState(
+      recentMomentIds: _prepend(ids, state.recentMomentIds),
+      previousGroupIds: List.unmodifiable(ids),
+    );
+  }
+
+  void requestMore(List<String> ids) {
+    recordDisplayed(ids);
+    ref.invalidate(childCompanionExperienceProvider(childId));
+  }
+
+  void choose(String id, List<String> displayedIds) {
+    state = CompanionIdeaSessionState(
+      recentMomentIds: _prepend([id, ...displayedIds], state.recentMomentIds),
+      previousGroupIds: List.unmodifiable(displayedIds),
+    );
+    ref.invalidate(childCompanionExperienceProvider(childId));
+  }
+
+  List<String> _prepend(List<String> values, List<String> existing) =>
+      List.unmodifiable({...values, ...existing}.take(30));
+}
+
+final companionIdeaSessionProvider =
+    StateNotifierProvider.family<
+      CompanionIdeaSessionNotifier,
+      CompanionIdeaSessionState,
+      String
+    >((ref, childId) => CompanionIdeaSessionNotifier(ref, childId));
 
 final childCompanionProfileProvider =
     FutureProvider.family<ChildCompanionProfile, String>((ref, childId) async {
@@ -49,31 +120,84 @@ final celebrationsProvider = FutureProvider.family<List<Celebration>, String>((
       .getCelebrations(familyId: session.familyId, childId: childId);
 });
 
-class CompanionSuggestionRequest {
-  const CompanionSuggestionRequest({
-    required this.childId,
-    required this.primaryNeed,
-    required this.mainMoment,
-    required this.availableContexts,
-    required this.availableDurationMinutes,
-    required this.availableParticipants,
-    this.availableMaterials = const {},
-    this.currentRoutine,
-    this.nextRoutine,
-    this.dateTime,
-  });
+final parentAttentionCountProvider = FutureProvider<int>((ref) async {
+  final children = await ref.watch(childrenProvider.future);
+  final missions = await ref.watch(pendingMissionValidationsProvider.future);
+  final memoriesByChild = await Future.wait([
+    for (final child in children)
+      ref.watch(companionMemoriesProvider(child.id).future),
+  ]);
+  return missions.length +
+      memoriesByChild.fold<int>(
+        0,
+        (count, memories) =>
+            count + memories.where((memory) => memory.isProposed).length,
+      );
+});
 
-  final String childId;
-  final CompanionNeed primaryNeed;
-  final String mainMoment;
-  final Set<String> availableContexts;
-  final int availableDurationMinutes;
-  final Set<CompanionParticipantContext> availableParticipants;
-  final Set<String> availableMaterials;
-  final RoutineModel? currentRoutine;
-  final RoutineModel? nextRoutine;
-  final DateTime? dateTime;
-}
+final childCompanionExperienceProvider =
+    FutureProvider.family<CompanionChildExperience, String>((
+      ref,
+      childId,
+    ) async {
+      final children = await ref.watch(childrenProvider.future);
+      ChildModel? child;
+      for (final candidate in children) {
+        if (candidate.id == childId) {
+          child = candidate;
+          break;
+        }
+      }
+      if (child == null) throw StateError('Enfant introuvable');
+      final dayItems = await ref.watch(childDayItemsProvider(childId).future);
+      final memories = await ref.watch(
+        companionMemoriesProvider(childId).future,
+      );
+      final celebrations = await ref.watch(
+        celebrationsProvider(childId).future,
+      );
+      final missionAnnouncements = await ref.watch(
+        pendingMissionAnnouncementsProvider(childId).future,
+      );
+      Celebration? celebration;
+      for (final candidate in celebrations) {
+        if (candidate.status == CelebrationStatus.pending) {
+          celebration = candidate;
+          break;
+        }
+      }
+      final contextTime =
+          ref.watch(companionContextClockProvider).valueOrNull ??
+          DateTime.now();
+      final request = ref
+          .read(companionContextPolicyProvider)
+          .buildDefaultRequest(
+            childId: childId,
+            dateTime: contextTime,
+            dayItems: dayItems,
+          );
+      final suggestions = await ref.watch(
+        companionSuggestionsProvider(request).future,
+      );
+      final dialogues = ref.read(companionDialogueServiceProvider);
+      final dialogue = celebration == null
+          ? missionAnnouncements.isNotEmpty
+                ? dialogues.missionValidatedDialogue(missionAnnouncements.first)
+                : dialogues.suggestionDialogue(
+                    child: child,
+                    suggestions: suggestions,
+                    validatedMemories: memories
+                        .where((memory) => memory.isValidated)
+                        .toList(),
+                  )
+          : dialogues.celebrationDialogue(celebration);
+      return CompanionChildExperience(
+        suggestions: suggestions,
+        dialogue: dialogue,
+        celebration: celebration,
+        missionAnnouncement: missionAnnouncements.firstOrNull,
+      );
+    });
 
 final companionSuggestionsProvider =
     FutureProvider.family<
@@ -124,6 +248,13 @@ final companionSuggestionsProvider =
           .map((observation) => observation.momentId!)
           .toSet()
           .toList();
+      final sessionIdeas = ref.read(
+        companionIdeaSessionProvider(request.childId),
+      );
+      final combinedRecentIds = <String>{
+        ...sessionIdeas.recentMomentIds,
+        ...recentMomentIds,
+      }.toList();
       final contexts = {...request.availableContexts};
       if (dayKind == PlanningDayKind.school) contexts.add('school');
       if (dayKind == PlanningDayKind.vacation) contexts.add('vacation');
@@ -154,7 +285,8 @@ final companionSuggestionsProvider =
               .toList(),
           availableMaterials: request.availableMaterials,
           availableParticipants: request.availableParticipants,
-          recentMomentIds: recentMomentIds,
+          recentMomentIds: combinedRecentIds,
+          previousGroupIds: sessionIdeas.previousGroupIds,
         ),
       );
     });
@@ -169,6 +301,7 @@ class CompanionObservationNotifier extends StateNotifier<AsyncValue<void>> {
     required String interactionSessionId,
     required CompanionObservationType type,
     String? momentId,
+    bool refreshSuggestions = false,
   }) async {
     final session = ref.read(sessionProvider);
     if (session == null || childId.isEmpty) return;
@@ -187,7 +320,9 @@ class CompanionObservationNotifier extends StateNotifier<AsyncValue<void>> {
         familyId: session.familyId,
         observation: observation,
       );
-      ref.invalidate(companionSuggestionsProvider);
+      if (refreshSuggestions) {
+        ref.invalidate(companionSuggestionsProvider);
+      }
     });
   }
 }
@@ -225,6 +360,7 @@ class CompanionMemoryDecisionNotifier extends StateNotifier<AsyncValue<void>> {
         );
       }
       ref.invalidate(companionMemoriesProvider(memory.childId));
+      ref.invalidate(parentAttentionCountProvider);
     });
   }
 }
@@ -242,7 +378,7 @@ class CelebrationCreationNotifier extends StateNotifier<AsyncValue<void>> {
   Future<void> create({
     required String childId,
     required CelebrationType type,
-    required bool givesShard,
+    required int shardReward,
   }) async {
     final session = ref.read(sessionProvider);
     if (session == null || childId.isEmpty || state.isLoading) return;
@@ -255,11 +391,9 @@ class CelebrationCreationNotifier extends StateNotifier<AsyncValue<void>> {
             childId: childId,
             type: type,
             parentId: session.userId,
-            givesShard: givesShard,
+            shardReward: shardReward,
           );
       ref.invalidate(celebrationsProvider(childId));
-      ref.invalidate(shardWalletProvider(childId));
-      ref.invalidate(recentShardTransactionsProvider(childId));
     });
   }
 }
@@ -269,6 +403,35 @@ final celebrationCreationProvider =
       (ref) => CelebrationCreationNotifier(ref),
     );
 
+class CelebrationDeliveryNotifier extends StateNotifier<AsyncValue<void>> {
+  CelebrationDeliveryNotifier(this.ref) : super(const AsyncData(null));
+
+  final Ref ref;
+
+  Future<void> markDelivered(Celebration celebration) async {
+    final session = ref.read(sessionProvider);
+    if (session == null || state.isLoading) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(companionRepositoryProvider)
+          .markCelebrationDelivered(
+            familyId: session.familyId,
+            celebration: celebration,
+          );
+      ref.invalidate(celebrationsProvider(celebration.childId));
+      ref.invalidate(childCompanionExperienceProvider(celebration.childId));
+      ref.invalidate(shardWalletProvider(celebration.childId));
+      ref.invalidate(recentShardTransactionsProvider(celebration.childId));
+    });
+  }
+}
+
+final celebrationDeliveryProvider =
+    StateNotifierProvider<CelebrationDeliveryNotifier, AsyncValue<void>>(
+      (ref) => CelebrationDeliveryNotifier(ref),
+    );
+
 class CompanionProfileNotifier extends StateNotifier<AsyncValue<void>> {
   CompanionProfileNotifier(this.ref) : super(const AsyncData(null));
 
@@ -276,7 +439,7 @@ class CompanionProfileNotifier extends StateNotifier<AsyncValue<void>> {
 
   Future<void> save(String childId, ChildCompanionProfile profile) async {
     final session = ref.read(sessionProvider);
-    if (session == null || childId.isEmpty) return;
+    if (session == null || childId.isEmpty || state.isLoading) return;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref

@@ -49,12 +49,7 @@ class _HouseGuardianState extends State<HouseGuardian> {
     _preloadedGuardianId = widget.guardian.id;
     for (final asset in widget.guardian.poseAssets) {
       unawaited(
-        precacheImage(AssetImage(asset), context).catchError((Object error) {
-          assert(() {
-            debugPrint('Impossible de précharger la pose Gardien: $asset');
-            return true;
-          }());
-        }),
+        precacheImage(AssetImage(asset), context).catchError((Object _) {}),
       );
     }
   }
@@ -123,12 +118,6 @@ class _HouseGuardianState extends State<HouseGuardian> {
                           final failedAsset = widget.guardian.assetForPose(
                             widget.pose,
                           );
-                          assert(() {
-                            debugPrint(
-                              'Asset Gardien introuvable: $failedAsset',
-                            );
-                            return true;
-                          }());
                           if (failedAsset == widget.guardian.idleAsset) {
                             return const Icon(
                               Icons.sentiment_satisfied_alt_rounded,

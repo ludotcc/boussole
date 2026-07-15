@@ -35,14 +35,6 @@ class CompanionRepository {
     profile: profile,
   );
 
-  String generateMemoryId(String familyId, String childId) =>
-      _service.generateMemoryId(familyId, childId);
-
-  Future<void> saveMemory({
-    required String familyId,
-    required CompanionMemory memory,
-  }) => _service.saveMemory(familyId: familyId, memory: memory);
-
   Future<List<CompanionMemory>> getMemories({
     required String familyId,
     required String childId,
@@ -80,7 +72,7 @@ class CompanionRepository {
     required String childId,
     required CelebrationType type,
     required String parentId,
-    required bool givesShard,
+    required int shardReward,
   }) {
     final celebration = Celebration.parentCreated(
       id: generateCelebrationId(familyId, childId),
@@ -88,7 +80,7 @@ class CompanionRepository {
       type: type,
       parentId: parentId,
       createdAt: DateTime.now(),
-      givesShard: givesShard,
+      shardReward: shardReward,
     );
     return _service.createParentCelebration(
       familyId: familyId,
@@ -96,15 +88,19 @@ class CompanionRepository {
     );
   }
 
-  Future<void> saveCelebration({
-    required String familyId,
-    required Celebration celebration,
-  }) => _service.saveCelebration(familyId: familyId, celebration: celebration);
-
   Future<List<Celebration>> getCelebrations({
     required String familyId,
     required String childId,
   }) => _service.getCelebrations(familyId: familyId, childId: childId);
+
+  Future<void> markCelebrationDelivered({
+    required String familyId,
+    required Celebration celebration,
+  }) => _service.markCelebrationDelivered(
+    familyId: familyId,
+    childId: celebration.childId,
+    celebrationId: celebration.id,
+  );
 
   String generateObservationId(String familyId, String childId) =>
       _service.generateObservationId(familyId, childId);

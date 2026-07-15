@@ -69,7 +69,7 @@ class MissionRepository {
       createdAt: date,
       expiresAt: endOfWeek,
       origin: SecretMissionOrigin.automatic,
-      reward: template.reward,
+      reward: 0,
       idempotencyKey: 'mission_$id',
       guardianId: guardianId,
     );
@@ -81,6 +81,14 @@ class MissionRepository {
     required String familyId,
     required String childId,
   }) => _service.getMissions(familyId: familyId, childId: childId);
+  Future<void> markAnnouncementDelivered({
+    required String familyId,
+    required SecretMission mission,
+  }) => _service.markAnnouncementDelivered(
+    familyId: familyId,
+    childId: mission.childId,
+    missionId: mission.id,
+  );
   Future<List<SharedMoment>> getSharedMoments({
     required String familyId,
     required String childId,
@@ -119,7 +127,7 @@ class MissionRepository {
       childId: mission.childId,
       missionId: mission.id,
       parentId: parentId,
-      reward: template.reward,
+      reward: 0,
       iconId: template.iconId,
     );
   }

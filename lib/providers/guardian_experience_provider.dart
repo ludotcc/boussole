@@ -12,17 +12,15 @@ class GuardianExperienceNotifier
   GuardianExperienceNotifier({
     required this.guardianId,
     DateTime Function()? now,
-    this.nightHour = 21,
     this.transientDuration = const Duration(seconds: 5),
   }) : _now = now ?? DateTime.now,
-       super(_initialState(guardianId, (now ?? DateTime.now)(), nightHour)) {
+       super(_initialState(guardianId, (now ?? DateTime.now)())) {
     if (!state.isSleeping) _scheduleIdle();
     _scheduleDayBoundary();
   }
 
   final GuardianId guardianId;
   final DateTime Function() _now;
-  final int nightHour;
   final Duration transientDuration;
   Timer? _timer;
   Timer? _dayBoundaryTimer;
@@ -31,11 +29,8 @@ class GuardianExperienceNotifier
   static GuardianExperienceState _initialState(
     GuardianId guardianId,
     DateTime now,
-    int nightHour,
   ) {
-    final pose = now.hour >= nightHour || now.hour < 7
-        ? GuardianPose.sleeping
-        : GuardianPose.welcome;
+    final pose = now.hour < 5 ? GuardianPose.sleeping : GuardianPose.welcome;
     return GuardianExperienceState(
       pose: pose,
       message: guardianDialogue(guardianId, pose),
@@ -74,6 +69,14 @@ class GuardianExperienceNotifier
     );
   }
 
+  void openCompanion() {
+    if (_isNight(_now())) {
+      refreshForCurrentTime();
+      return;
+    }
+    showChoices();
+  }
+
   void showSecretMission() {
     _timer?.cancel();
     state = const GuardianExperienceState(
@@ -99,6 +102,18 @@ class GuardianExperienceNotifier
       pose: celebrate ? GuardianPose.celebrate : GuardianPose.encourage,
       message: message,
     );
+    _scheduleIdle();
+  }
+
+  void showCompanionMessage(
+    String message, {
+    GuardianPose pose = GuardianPose.encourage,
+  }) {
+    if (_isNight(_now())) {
+      refreshForCurrentTime();
+      return;
+    }
+    state = GuardianExperienceState(pose: pose, message: message);
     _scheduleIdle();
   }
 
@@ -146,19 +161,17 @@ class GuardianExperienceNotifier
     );
   }
 
-  bool _isNight(DateTime value) => value.hour >= nightHour || value.hour < 7;
+  bool _isNight(DateTime value) => value.hour < 5;
 
   void _scheduleDayBoundary() {
     _dayBoundaryTimer?.cancel();
     final current = _now();
     late final DateTime boundary;
-    if (current.hour < 7) {
-      boundary = DateTime(current.year, current.month, current.day, 7);
-    } else if (current.hour < nightHour) {
-      boundary = DateTime(current.year, current.month, current.day, nightHour);
+    if (current.hour < 5) {
+      boundary = DateTime(current.year, current.month, current.day, 5);
     } else {
       final tomorrow = current.add(const Duration(days: 1));
-      boundary = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 7);
+      boundary = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
     }
     final delay = boundary.difference(current);
     _dayBoundaryTimer = Timer(
@@ -183,6 +196,6 @@ final guardianExperienceProvider =
     >((ref, childId) {
       final guardian =
           ref.watch(childGuardianProvider(childId)).valueOrNull ??
-          GuardianModel.all.first;
+          GuardianModel.fromStorageId('wave', fallback: GuardianId.wave);
       return GuardianExperienceNotifier(guardianId: guardian.id);
     });

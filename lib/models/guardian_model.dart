@@ -84,6 +84,12 @@ class GuardianModel {
 
   String get storageId => id.name;
 
+  int get price => switch (id) {
+    GuardianId.wave => 0,
+    GuardianId.crystal || GuardianId.pixel => 10,
+    GuardianId.pyro || GuardianId.gear => 15,
+  };
+
   String assetFor(GuardianActivity activity) {
     if (id == GuardianId.crystal) {
       if (activity == GuardianActivity.wakingUp) {
@@ -145,10 +151,13 @@ class GuardianModel {
     ),
   ];
 
-  static GuardianModel fromStorageId(String? value) {
+  static GuardianModel fromStorageId(
+    String? value, {
+    GuardianId fallback = GuardianId.crystal,
+  }) {
     return all.firstWhere(
       (guardian) => guardian.storageId == value,
-      orElse: () => all.first,
+      orElse: () => all.firstWhere((guardian) => guardian.id == fallback),
     );
   }
 }

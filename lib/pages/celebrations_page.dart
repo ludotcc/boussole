@@ -21,12 +21,16 @@ class CelebrationsPage extends ConsumerStatefulWidget {
 
 class _CelebrationsPageState extends ConsumerState<CelebrationsPage> {
   CelebrationType _type = CelebrationType.positiveBehavior;
-  bool _givesShard = false;
+  int _shardReward = 0;
 
   Future<void> _create() async {
     await ref
         .read(celebrationCreationProvider.notifier)
-        .create(childId: widget.child.id, type: _type, givesShard: _givesShard);
+        .create(
+          childId: widget.child.id,
+          type: _type,
+          shardReward: _shardReward,
+        );
     if (!mounted) return;
     final state = ref.read(celebrationCreationProvider);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -79,17 +83,26 @@ class _CelebrationsPageState extends ConsumerState<CelebrationsPage> {
                           },
                   ),
                   const SizedBox(height: 12),
-                  SwitchListTile(
+                  const Text('Éclats remis par le Compagnon'),
+                  const SizedBox(height: 8),
+                  Wrap(
                     key: const ValueKey('celebration_shard'),
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Donner un Éclat'),
-                    subtitle: const Text(
-                      'Facultatif et indépendant de la célébration.',
-                    ),
-                    value: _givesShard,
-                    onChanged: creationState.isLoading
-                        ? null
-                        : (value) => setState(() => _givesShard = value),
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (var amount = 0; amount <= 5; amount++)
+                        ChoiceChip(
+                          label: Text(
+                            amount == 0
+                                ? 'Sans Éclat'
+                                : '+$amount Éclat${amount > 1 ? 's' : ''}',
+                          ),
+                          selected: _shardReward == amount,
+                          onSelected: creationState.isLoading
+                              ? null
+                              : (_) => setState(() => _shardReward = amount),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   if (creationState.isLoading)
@@ -128,7 +141,7 @@ class _CelebrationsPageState extends ConsumerState<CelebrationsPage> {
                               title: Text(_celebrationLabel(celebration.type)),
                               subtitle: Text(
                                 celebration.shardReward > 0
-                                    ? 'Avec un Éclat'
+                                    ? 'Avec ${celebration.shardReward} Éclat${celebration.shardReward > 1 ? 's' : ''}'
                                     : 'Sans Éclat',
                               ),
                             ),

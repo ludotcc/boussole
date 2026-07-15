@@ -36,17 +36,30 @@ final pendingMissionValidationsProvider = FutureProvider<List<SecretMission>>((
   final children = await ref.watch(childrenProvider.future);
   if (session == null) return [];
   final repository = ref.read(missionRepositoryProvider);
-  final pending = <SecretMission>[];
-  for (final child in children) {
-    final missions = await repository.getMissions(
-      familyId: session.familyId,
-      childId: child.id,
-    );
-    pending.addAll(missions.where((mission) => mission.isPending));
-  }
+  final missionsByChild = await Future.wait([
+    for (final child in children)
+      repository.getMissions(familyId: session.familyId, childId: child.id),
+  ]);
+  final pending = missionsByChild
+      .expand((missions) => missions)
+      .where((mission) => mission.isPending)
+      .toList();
   pending.sort((a, b) => b.createdAt.compareTo(a.createdAt));
   return pending;
 });
+
+final pendingMissionAnnouncementsProvider =
+    FutureProvider.family<List<SecretMission>, String>((ref, childId) async {
+      final session = ref.watch(sessionProvider);
+      if (session == null || childId.isEmpty) return [];
+      final missions = await ref
+          .read(missionRepositoryProvider)
+          .getMissions(familyId: session.familyId, childId: childId);
+      return missions
+          .where((mission) => mission.hasPendingAnnouncement)
+          .toList()
+        ..sort((a, b) => a.validatedAt!.compareTo(b.validatedAt!));
+    });
 
 class MissionActionNotifier extends StateNotifier<AsyncValue<void>> {
   MissionActionNotifier(this.ref, this.childId) : super(const AsyncData(null));
@@ -120,9 +133,12 @@ class MissionValidationNotifier
       }
       ref.invalidate(pendingMissionValidationsProvider);
       ref.invalidate(childSecretMissionProvider(mission.childId));
-      ref.invalidate(shardWalletProvider(mission.childId));
-      ref.invalidate(recentShardTransactionsProvider(mission.childId));
-      ref.invalidate(sharedMomentsProvider(mission.childId));
+      if (validate) {
+        ref.invalidate(shardWalletProvider(mission.childId));
+        ref.invalidate(recentShardTransactionsProvider(mission.childId));
+        ref.invalidate(sharedMomentsProvider(mission.childId));
+        ref.invalidate(pendingMissionAnnouncementsProvider(mission.childId));
+      }
       return result;
     });
   }
@@ -133,3 +149,31 @@ final missionValidationProvider =
       MissionValidationNotifier,
       AsyncValue<MissionValidationResult?>
     >((ref) => MissionValidationNotifier(ref));
+
+class MissionAnnouncementDeliveryNotifier
+    extends StateNotifier<AsyncValue<void>> {
+  MissionAnnouncementDeliveryNotifier(this.ref) : super(const AsyncData(null));
+  final Ref ref;
+
+  Future<void> markDelivered(SecretMission mission) async {
+    if (state.isLoading) return;
+    final session = ref.read(sessionProvider);
+    if (session == null) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(missionRepositoryProvider)
+          .markAnnouncementDelivered(
+            familyId: session.familyId,
+            mission: mission,
+          );
+      ref.invalidate(pendingMissionAnnouncementsProvider(mission.childId));
+    });
+  }
+}
+
+final missionAnnouncementDeliveryProvider =
+    StateNotifierProvider<
+      MissionAnnouncementDeliveryNotifier,
+      AsyncValue<void>
+    >((ref) => MissionAnnouncementDeliveryNotifier(ref));

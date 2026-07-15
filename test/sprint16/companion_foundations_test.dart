@@ -85,4 +85,27 @@ void main() {
       expect(celebration.status, CelebrationStatus.pending);
     },
   );
+
+  test('la recompense de celebration attend l enfant et reste unique', () {
+    final zero = Celebration.parentCreated(
+      id: 'zero',
+      childId: 'child',
+      type: CelebrationType.courage,
+      parentId: 'parent',
+      createdAt: DateTime(2026),
+      shardReward: 0,
+    );
+    final rewarded = Celebration(
+      id: 'rewarded',
+      childId: 'child',
+      type: CelebrationType.courage,
+      createdByParentId: 'parent',
+      createdAt: DateTime(2026),
+      shardReward: 4,
+    );
+
+    expect(zero.shouldCreditReward(ledgerExists: false), isFalse);
+    expect(rewarded.shouldCreditReward(ledgerExists: false), isTrue);
+    expect(rewarded.shouldCreditReward(ledgerExists: true), isFalse);
+  });
 }

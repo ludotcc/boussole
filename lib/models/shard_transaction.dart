@@ -7,6 +7,8 @@ enum ShardTransactionSource {
   findingPurchase,
   secretMissionValidation,
   celebration,
+  guardianPurchase,
+  parentRewardRedemption,
 }
 
 class ShardTransaction {

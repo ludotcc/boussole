@@ -95,7 +95,7 @@ void main() {
       type: CelebrationType.courage,
       parentId: 'parent',
       createdAt: DateTime(2026, 7, 15),
-      givesShard: true,
+      shardReward: 1,
     );
     final map = celebration.toMap();
 

@@ -79,8 +79,9 @@ void main() {
         MissionValidationResult.validated,
       );
       final credited = service.balance;
-      expect(credited, inInclusiveRange(5, 15));
+      expect(credited, 1);
       expect(service.moments, hasLength(1));
+      expect(service.missions.single.hasPendingAnnouncement, isTrue);
       expect(service.moments.single.guardianId, 'pixel');
       expect(
         await repository.validate(
@@ -92,6 +93,31 @@ void main() {
       );
       expect(service.balance, credited);
       expect(service.moments, hasLength(1));
+    });
+
+    test('annonce livrée uniquement après action et une seule fois', () async {
+      final service = _FakeMissionService();
+      final repository = MissionRepository(service: service);
+      final mission = await _pendingMission(repository, service);
+      await repository.validate(
+        familyId: 'family',
+        mission: mission,
+        parentId: 'parent',
+      );
+      final validated = service.missions.single;
+      expect(validated.hasPendingAnnouncement, isTrue);
+
+      await repository.markAnnouncementDelivered(
+        familyId: 'family',
+        mission: validated,
+      );
+      final deliveredAt = service.missions.single.announcementDeliveredAt;
+      expect(service.missions.single.hasPendingAnnouncement, isFalse);
+      await repository.markAnnouncementDelivered(
+        familyId: 'family',
+        mission: validated,
+      );
+      expect(service.missions.single.announcementDeliveredAt, deliveredAt);
     });
 
     test('refus ne crédite pas et ne crée pas de souvenir', () async {
@@ -160,6 +186,21 @@ class _FakeMissionService implements MissionService {
   int balance = 0;
 
   @override
+  Future<void> markAnnouncementDelivered({
+    required String familyId,
+    required String childId,
+    required String missionId,
+  }) async {
+    final index = missions.indexWhere((mission) => mission.id == missionId);
+    if (index < 0 || !missions[index].hasPendingAnnouncement) return;
+    missions[index] = _copy(
+      missions[index],
+      announcementDeliveredAt: DateTime.now(),
+      announcementPending: false,
+    );
+  }
+
+  @override
   Future<void> createMission({
     required String familyId,
     required SecretMission mission,
@@ -213,7 +254,11 @@ class _FakeMissionService implements MissionService {
     }
     ledger.add('mission_$missionId');
     balance += reward;
-    missions[index] = _copy(mission, status: SecretMissionStatus.validated);
+    missions[index] = _copy(
+      mission,
+      status: SecretMissionStatus.validated,
+      announcementPending: true,
+    );
     moments.add(
       SharedMoment(
         id: mission.id,
@@ -264,6 +309,8 @@ SecretMission _copy(
   SecretMissionStatus? status,
   DateTime? expiresAt,
   String? guardianId,
+  DateTime? announcementDeliveredAt,
+  bool? announcementPending,
 }) => SecretMission(
   id: value.id,
   childId: value.childId,
@@ -280,4 +327,7 @@ SecretMission _copy(
   guardianId: guardianId ?? value.guardianId,
   validatedAt: value.validatedAt,
   validatedBy: value.validatedBy,
+  announcementDeliveredAt:
+      announcementDeliveredAt ?? value.announcementDeliveredAt,
+  announcementPending: announcementPending ?? value.announcementPending,
 );

@@ -5,8 +5,8 @@ import '../services/daily_settlement_service.dart';
 class DailyLightPolicy {
   const DailyLightPolicy();
 
-  static const gentleEventReward = 3;
-  static const maximumGentleReward = 6;
+  static const gentleEventReward = 1;
+  static const maximumGentleReward = 1;
 
   DailyLightSummary summarize({
     required String childId,
@@ -25,11 +25,7 @@ class DailyLightPolicy {
 
   int calculateDailyShardReward(double progressRatio) {
     final ratio = progressRatio.clamp(0.0, 1.0);
-    if (ratio >= 1) return 25;
-    if (ratio >= .75) return 18;
-    if (ratio >= .50) return 10;
-    if (ratio >= .25) return 5;
-    return 0;
+    return ratio >= 1 ? 5 : 0;
   }
 
   int calculateGentleSupportBonus(int eligibleEventCount) =>

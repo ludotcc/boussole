@@ -58,66 +58,6 @@ class HouseNavigation extends StatelessWidget {
   }
 }
 
-class HouseTodayAction extends StatelessWidget {
-  const HouseTodayAction({super.key, required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    const color = Color(0xFF79E3F2);
-    return Semantics(
-      button: true,
-      label: 'Ouvrir Ma journée',
-      child: Material(
-        color: const Color(0xFF102B35).withValues(alpha: .82),
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            constraints: const BoxConstraints(minWidth: 50, minHeight: 48),
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: color.withValues(alpha: .82)),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withValues(alpha: .14),
-                  blurRadius: 12,
-                  spreadRadius: -2,
-                ),
-              ],
-            ),
-            child: const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.calendar_today_rounded, color: color, size: 19),
-                SizedBox(height: 6),
-                Flexible(
-                  child: Text(
-                    'Ma journée',
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      height: 1.05,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 6),
-                Icon(Icons.arrow_forward_rounded, color: color, size: 15),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _HouseAction extends StatelessWidget {
   const _HouseAction({
     required this.width,

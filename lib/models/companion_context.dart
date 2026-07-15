@@ -23,6 +23,7 @@ class CompanionContext {
     this.availableMaterials = const {},
     this.availableParticipants = const {CompanionParticipantContext.alone},
     this.recentMomentIds = const [],
+    this.previousGroupIds = const [],
   });
 
   final DateTime dateTime;
@@ -42,4 +43,5 @@ class CompanionContext {
   final Set<String> availableMaterials;
   final Set<CompanionParticipantContext> availableParticipants;
   final List<String> recentMomentIds;
+  final List<String> previousGroupIds;
 }

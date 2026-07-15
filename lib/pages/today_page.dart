@@ -722,10 +722,6 @@ class _DismissibleDoneMoment extends ConsumerWidget {
           final result = ref.read(todayMomentRemovalProvider);
 
           if (result.hasError && context.mounted) {
-            debugPrint(
-              'Suppression du moment ${item.id} impossible: '
-              '${result.error}\n${result.stackTrace}',
-            );
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Ce moment est resté dans ta journée.'),
@@ -742,12 +738,7 @@ class _DismissibleDoneMoment extends ConsumerWidget {
                   momentId: item.id,
                   momentIds: itemIds,
                 );
-          } catch (error, stackTrace) {
-            debugPrint(
-              'Nettoyage de progression après suppression impossible: '
-              '$error\n$stackTrace',
-            );
-          }
+          } catch (_) {}
 
           return false;
         },
