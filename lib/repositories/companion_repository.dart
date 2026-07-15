@@ -48,8 +48,53 @@ class CompanionRepository {
     required String childId,
   }) => _service.getMemories(familyId: familyId, childId: childId);
 
+  Future<void> validateMemory({
+    required String familyId,
+    required CompanionMemory memory,
+    required String parentId,
+  }) => _service.decideMemory(
+    familyId: familyId,
+    childId: memory.childId,
+    memoryId: memory.id,
+    decision: CompanionMemoryStatus.validated,
+    parentId: parentId,
+  );
+
+  Future<void> refuseMemory({
+    required String familyId,
+    required CompanionMemory memory,
+    required String parentId,
+  }) => _service.decideMemory(
+    familyId: familyId,
+    childId: memory.childId,
+    memoryId: memory.id,
+    decision: CompanionMemoryStatus.refused,
+    parentId: parentId,
+  );
+
   String generateCelebrationId(String familyId, String childId) =>
       _service.generateCelebrationId(familyId, childId);
+
+  Future<void> createCelebration({
+    required String familyId,
+    required String childId,
+    required CelebrationType type,
+    required String parentId,
+    required bool givesShard,
+  }) {
+    final celebration = Celebration.parentCreated(
+      id: generateCelebrationId(familyId, childId),
+      childId: childId,
+      type: type,
+      parentId: parentId,
+      createdAt: DateTime.now(),
+      givesShard: givesShard,
+    );
+    return _service.createParentCelebration(
+      familyId: familyId,
+      celebration: celebration,
+    );
+  }
 
   Future<void> saveCelebration({
     required String familyId,

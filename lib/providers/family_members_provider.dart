@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/family_member_model.dart';
+import '../models/child_companion_profile.dart';
 import 'children_provider.dart';
 import 'family_action_notifier.dart';
 import 'family_provider.dart';
@@ -27,11 +28,15 @@ class FamilyMemberActionNotifier extends FamilyActionNotifier {
     required FamilyMemberModel member,
     required String firstName,
     required int age,
+    DateTime? birthDate,
+    ChildCompanionProfile? companionProfile,
     required String avatar,
     required String profileType,
   }) {
     return runFamilyAction((familyId) async {
-      if (firstName.trim().isEmpty || age <= 0 || avatar.isEmpty) {
+      if (firstName.trim().isEmpty ||
+          (birthDate == null && age <= 0) ||
+          avatar.isEmpty) {
         throw Exception('Merci de compléter correctement le membre.');
       }
 
@@ -41,6 +46,8 @@ class FamilyMemberActionNotifier extends FamilyActionNotifier {
             member: member,
             firstName: firstName.trim(),
             age: age,
+            birthDate: birthDate,
+            companionProfile: companionProfile,
             avatar: avatar,
             profileType: profileType,
           );

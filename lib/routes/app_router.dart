@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../pages/create_child_page.dart';
 import '../pages/create_adult_page.dart';
+import '../pages/celebrations_page.dart';
+import '../pages/companion_memories_page.dart';
 import '../pages/child_selector_page.dart';
 import '../pages/create_family_page.dart';
 import '../pages/create_moment_settings_page.dart';
@@ -197,6 +199,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/parent/mission-validations',
         builder: (_, _) => const ParentMissionValidationsPage(),
+      ),
+
+      GoRoute(
+        path: '/parent/companion-memories',
+        builder: (_, state) {
+          final child = state.extra;
+          if (child is! FamilyMemberModel || child.isAdult) {
+            return const FamilyMembersManagementPage();
+          }
+          return CompanionMemoriesPage(child: child);
+        },
+      ),
+
+      GoRoute(
+        path: '/parent/celebrations',
+        builder: (_, state) {
+          final child = state.extra;
+          if (child is! FamilyMemberModel || child.isAdult) {
+            return const FamilyMembersManagementPage();
+          }
+          return CelebrationsPage(child: child);
+        },
       ),
 
       GoRoute(

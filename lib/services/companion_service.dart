@@ -4,6 +4,7 @@ import '../models/celebration.dart';
 import '../models/child_companion_profile.dart';
 import '../models/companion_memory.dart';
 import '../models/companion_observation.dart';
+import '../models/shard_transaction.dart';
 
 class CompanionService {
   CompanionService({FirebaseFirestore? firestore})
@@ -67,6 +68,28 @@ class CompanionService {
     return memories;
   }
 
+  Future<void> decideMemory({
+    required String familyId,
+    required String childId,
+    required String memoryId,
+    required CompanionMemoryStatus decision,
+    required String parentId,
+  }) {
+    final reference = _memories(familyId, childId).doc(memoryId);
+    return _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(reference);
+      if (!snapshot.exists) throw StateError('Mémoire introuvable.');
+      final memory = CompanionMemory.fromMap(snapshot.id, snapshot.data()!);
+      if (!memory.isProposed) return;
+      final decidedMemory = memory.decide(
+        decision: decision,
+        parentId: parentId,
+        decidedAt: DateTime.now(),
+      );
+      transaction.update(reference, decidedMemory.toMap());
+    });
+  }
+
   String generateCelebrationId(String familyId, String childId) =>
       _celebrations(familyId, childId).doc().id;
 
@@ -77,6 +100,49 @@ class CompanionService {
     familyId,
     celebration.childId,
   ).doc(celebration.id).set(celebration.toMap(), SetOptions(merge: true));
+
+  Future<void> createParentCelebration({
+    required String familyId,
+    required Celebration celebration,
+  }) {
+    final childReference = _child(familyId, celebration.childId);
+    final celebrationReference = _celebrations(
+      familyId,
+      celebration.childId,
+    ).doc(celebration.id);
+    if (celebration.shardReward == 0) {
+      return celebrationReference.set(celebration.toMap());
+    }
+    final walletReference = childReference.collection('economy').doc('state');
+    final sourceKey = 'celebration_${celebration.id}';
+    final ledgerReference = childReference
+        .collection('reward_ledger')
+        .doc(sourceKey);
+    return _firestore.runTransaction((transaction) async {
+      final ledgerSnapshot = await transaction.get(ledgerReference);
+      if (ledgerSnapshot.exists) return;
+      final walletSnapshot = await transaction.get(walletReference);
+      final balance = ((walletSnapshot.data()?['balance'] as num?) ?? 0)
+          .toInt();
+      transaction.set(celebrationReference, celebration.toMap());
+      transaction.set(walletReference, {
+        'balance': balance + celebration.shardReward,
+        'updatedAt': Timestamp.fromDate(celebration.createdAt),
+      });
+      transaction.set(
+        ledgerReference,
+        ShardTransaction(
+          id: sourceKey,
+          childId: celebration.childId,
+          type: ShardTransactionType.credit,
+          source: ShardTransactionSource.celebration,
+          amount: celebration.shardReward,
+          sourceKey: sourceKey,
+          createdAt: celebration.createdAt,
+        ).toMap(),
+      );
+    });
+  }
 
   Future<List<Celebration>> getCelebrations({
     required String familyId,

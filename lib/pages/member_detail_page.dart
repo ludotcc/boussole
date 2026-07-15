@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../core/app_colors.dart';
 import '../core/app_text_styles.dart';
 import '../core/constants/avatar_constants.dart';
+import '../models/child_companion_profile.dart';
 import '../models/family_member_model.dart';
 import '../models/planning_day_kind.dart';
 import '../models/school_academy.dart';
@@ -14,6 +15,7 @@ import '../providers/family_members_provider.dart';
 import '../widgets/avatar/avatar_grid.dart';
 import '../widgets/boussole_button.dart';
 import '../widgets/common/app_card.dart';
+import '../widgets/family/companion_profile_sections.dart';
 
 class MemberDetailPage extends ConsumerStatefulWidget {
   const MemberDetailPage({super.key, required this.member});
@@ -27,6 +29,8 @@ class MemberDetailPage extends ConsumerStatefulWidget {
 class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
   late final TextEditingController _firstNameController;
   late final TextEditingController _ageController;
+  DateTime? _birthDate;
+  late ChildCompanionProfile _companionProfile;
   late String _profileType;
   late String _selectedAvatar;
   late String _academyId;
@@ -39,6 +43,8 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
     _ageController = TextEditingController(
       text: widget.member.age?.toString() ?? '',
     );
+    _birthDate = widget.member.birthDate;
+    _companionProfile = widget.member.companionProfile;
     _profileType = _normalizedProfileType(widget.member);
     _academyId = widget.member.academyId ?? defaultSchoolAcademyId;
     _weeklyRhythmByWeekday = widget.member.weeklyRhythmByWeekday.isEmpty
@@ -60,8 +66,13 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
     final firstName = _firstNameController.text.trim();
     final age = int.tryParse(_ageController.text.trim());
 
-    if (age == null) {
+    if (widget.member.isAdult && age == null) {
       _showMessage('Merci d’indiquer un âge.');
+      return;
+    }
+
+    if (!widget.member.isAdult && _birthDate == null) {
+      _showMessage('Merci d’indiquer une date de naissance.');
       return;
     }
 
@@ -70,7 +81,9 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
         .updateMember(
           member: widget.member,
           firstName: firstName,
-          age: age,
+          age: widget.member.isAdult ? age! : _calculatedAge(_birthDate!),
+          birthDate: widget.member.isAdult ? null : _birthDate,
+          companionProfile: widget.member.isAdult ? null : _companionProfile,
           avatar: _selectedAvatar,
           profileType: _profileType,
         );
@@ -155,6 +168,31 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
     context.pop();
   }
 
+  Future<void> _pickBirthDate() async {
+    final today = DateTime.now();
+    final selected = await showDatePicker(
+      context: context,
+      initialDate:
+          _birthDate ?? DateTime(today.year - 8, today.month, today.day),
+      firstDate: DateTime(today.year - 18),
+      lastDate: today,
+    );
+    if (selected != null && mounted) setState(() => _birthDate = selected);
+  }
+
+  int _calculatedAge(DateTime birthDate) {
+    final today = DateTime.now();
+    var age = today.year - birthDate.year;
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+    return age;
+  }
+
+  String _formatDate(DateTime date) =>
+      '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+
   void _showMessage(String message) {
     ScaffoldMessenger.of(
       context,
@@ -196,14 +234,28 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: _ageController,
-                    keyboardType: TextInputType.number,
-                    decoration: _inputDecoration(
-                      label: 'Âge',
-                      icon: Icons.cake_outlined,
+                  if (widget.member.isAdult)
+                    TextField(
+                      controller: _ageController,
+                      keyboardType: TextInputType.number,
+                      decoration: _inputDecoration(
+                        label: 'Âge',
+                        icon: Icons.cake_outlined,
+                      ),
+                    )
+                  else
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.cake_outlined),
+                      title: const Text('Date de naissance'),
+                      subtitle: Text(
+                        _birthDate == null
+                            ? 'À renseigner'
+                            : '${_formatDate(_birthDate!)} · ${_calculatedAge(_birthDate!)} ans',
+                      ),
+                      trailing: const Icon(Icons.calendar_month_rounded),
+                      onTap: isLoading ? null : _pickBirthDate,
                     ),
-                  ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     initialValue: _profileType,
@@ -246,6 +298,41 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
             ),
             const SizedBox(height: 20),
             if (!widget.member.isAdult) ...[
+              CompanionProfileSections(
+                profile: _companionProfile,
+                enabled: !isLoading,
+                onChanged: (profile) =>
+                    setState(() => _companionProfile = profile),
+              ),
+              const SizedBox(height: 20),
+              AppCard(
+                child: Column(
+                  children: [
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.psychology_alt_rounded),
+                      title: const Text('Mémoires du Compagnon'),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => context.push(
+                        '/parent/companion-memories',
+                        extra: widget.member,
+                      ),
+                    ),
+                    const Divider(),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.celebration_rounded),
+                      title: const Text('Célébrations'),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => context.push(
+                        '/parent/celebrations',
+                        extra: widget.member,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
               _AcademySection(
                 academyId: _academyId,
                 academies: academiesAsync.valueOrNull ?? _fallbackAcademies,

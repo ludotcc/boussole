@@ -44,6 +44,29 @@ class CompanionMemory {
   bool get isValidated => status == CompanionMemoryStatus.validated;
   bool get isProposed => status == CompanionMemoryStatus.proposed;
 
+  CompanionMemory decide({
+    required CompanionMemoryStatus decision,
+    required String parentId,
+    required DateTime decidedAt,
+  }) {
+    if (!isProposed || decision == CompanionMemoryStatus.proposed) return this;
+    return CompanionMemory(
+      id: id,
+      childId: childId,
+      type: type,
+      value: value,
+      status: decision,
+      priority: priority,
+      reliability: reliability,
+      observationCount: observationCount,
+      createdAt: createdAt,
+      updatedAt: decidedAt,
+      lastObservedAt: lastObservedAt,
+      decidedAt: decidedAt,
+      decidedByParentId: parentId,
+    );
+  }
+
   Map<String, dynamic> toMap() => {
     'childId': childId,
     'type': type.name,

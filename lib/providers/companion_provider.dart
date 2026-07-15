@@ -13,6 +13,7 @@ import '../models/routine_model.dart';
 import '../repositories/companion_repository.dart';
 import 'children_provider.dart';
 import 'family_provider.dart';
+import 'rewards_provider.dart';
 import 'session_provider.dart';
 
 final companionRepositoryProvider = Provider<CompanionRepository>(
@@ -194,6 +195,78 @@ class CompanionObservationNotifier extends StateNotifier<AsyncValue<void>> {
 final companionObservationNotifierProvider =
     StateNotifierProvider<CompanionObservationNotifier, AsyncValue<void>>(
       (ref) => CompanionObservationNotifier(ref),
+    );
+
+class CompanionMemoryDecisionNotifier extends StateNotifier<AsyncValue<void>> {
+  CompanionMemoryDecisionNotifier(this.ref) : super(const AsyncData(null));
+
+  final Ref ref;
+
+  Future<void> validate(CompanionMemory memory) => _decide(memory, true);
+  Future<void> refuse(CompanionMemory memory) => _decide(memory, false);
+
+  Future<void> _decide(CompanionMemory memory, bool validate) async {
+    final session = ref.read(sessionProvider);
+    if (session == null || state.isLoading) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repository = ref.read(companionRepositoryProvider);
+      if (validate) {
+        await repository.validateMemory(
+          familyId: session.familyId,
+          memory: memory,
+          parentId: session.userId,
+        );
+      } else {
+        await repository.refuseMemory(
+          familyId: session.familyId,
+          memory: memory,
+          parentId: session.userId,
+        );
+      }
+      ref.invalidate(companionMemoriesProvider(memory.childId));
+    });
+  }
+}
+
+final companionMemoryDecisionProvider =
+    StateNotifierProvider<CompanionMemoryDecisionNotifier, AsyncValue<void>>(
+      (ref) => CompanionMemoryDecisionNotifier(ref),
+    );
+
+class CelebrationCreationNotifier extends StateNotifier<AsyncValue<void>> {
+  CelebrationCreationNotifier(this.ref) : super(const AsyncData(null));
+
+  final Ref ref;
+
+  Future<void> create({
+    required String childId,
+    required CelebrationType type,
+    required bool givesShard,
+  }) async {
+    final session = ref.read(sessionProvider);
+    if (session == null || childId.isEmpty || state.isLoading) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(companionRepositoryProvider)
+          .createCelebration(
+            familyId: session.familyId,
+            childId: childId,
+            type: type,
+            parentId: session.userId,
+            givesShard: givesShard,
+          );
+      ref.invalidate(celebrationsProvider(childId));
+      ref.invalidate(shardWalletProvider(childId));
+      ref.invalidate(recentShardTransactionsProvider(childId));
+    });
+  }
+}
+
+final celebrationCreationProvider =
+    StateNotifierProvider<CelebrationCreationNotifier, AsyncValue<void>>(
+      (ref) => CelebrationCreationNotifier(ref),
     );
 
 class CompanionProfileNotifier extends StateNotifier<AsyncValue<void>> {

@@ -10,22 +10,26 @@ class FamilyMemberFormCard extends StatelessWidget {
     super.key,
     required this.firstNameController,
     required this.ageController,
+    required this.birthDate,
     required this.profileType,
     required this.selectedAvatar,
     required this.isLoading,
     required this.onProfileTypeChanged,
     required this.onAvatarSelected,
+    required this.onBirthDateTap,
     required this.onSubmit,
     required this.onCancel,
   });
 
   final TextEditingController firstNameController;
   final TextEditingController ageController;
+  final DateTime? birthDate;
   final String profileType;
   final String? selectedAvatar;
   final bool isLoading;
   final ValueChanged<String> onProfileTypeChanged;
   final ValueChanged<String> onAvatarSelected;
+  final VoidCallback onBirthDateTap;
   final VoidCallback onSubmit;
   final VoidCallback onCancel;
 
@@ -63,14 +67,28 @@ class FamilyMemberFormCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: ageController,
-            keyboardType: TextInputType.number,
-            decoration: _inputDecoration(
-              label: 'Âge',
-              icon: Icons.cake_outlined,
+          if (profileType == 'papa' || profileType == 'maman')
+            TextField(
+              controller: ageController,
+              keyboardType: TextInputType.number,
+              decoration: _inputDecoration(
+                label: 'Âge',
+                icon: Icons.cake_outlined,
+              ),
+            )
+          else
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.cake_outlined),
+              title: const Text('Date de naissance'),
+              subtitle: Text(
+                birthDate == null
+                    ? 'À renseigner'
+                    : '${birthDate!.day.toString().padLeft(2, '0')}/${birthDate!.month.toString().padLeft(2, '0')}/${birthDate!.year}',
+              ),
+              trailing: const Icon(Icons.calendar_month_rounded),
+              onTap: isLoading ? null : onBirthDateTap,
             ),
-          ),
           const SizedBox(height: 20),
           AvatarGrid(
             selectedAvatarId: selectedAvatar,

@@ -141,6 +141,8 @@ class FamilyRepository {
     required FamilyMemberModel member,
     required String firstName,
     required int age,
+    DateTime? birthDate,
+    ChildCompanionProfile? companionProfile,
     required String avatar,
     required String profileType,
   }) async {
@@ -171,9 +173,11 @@ class FamilyRepository {
         firstName: firstName,
         avatar: avatar,
         age: age,
-        birthDate: existingChild?.birthDate,
+        birthDate: birthDate ?? existingChild?.birthDate,
         companionProfile:
-            existingChild?.companionProfile ?? const ChildCompanionProfile(),
+            companionProfile ??
+            existingChild?.companionProfile ??
+            const ChildCompanionProfile(),
         profileType: profileType,
         academyId:
             existingChild?.academyId ??

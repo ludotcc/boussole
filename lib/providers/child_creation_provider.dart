@@ -81,7 +81,9 @@ class ChildRegistrationNotifier extends FamilyActionNotifier {
     Map<int, String>? weeklyRhythmByWeekday,
   }) {
     return runFamilyAction((familyId) {
-      if (firstName.trim().isEmpty || age <= 0 || avatar.isEmpty) {
+      if (firstName.trim().isEmpty ||
+          (birthDate == null && age <= 0) ||
+          avatar.isEmpty) {
         throw Exception("Merci de compléter correctement le profil enfant.");
       }
 
@@ -109,7 +111,7 @@ class ChildRegistrationNotifier extends FamilyActionNotifier {
       }
 
       if (draft.firstName.trim().isEmpty ||
-          draft.age <= 0 ||
+          (draft.birthDate == null && draft.age <= 0) ||
           draft.avatar.isEmpty) {
         throw Exception("Merci de compléter correctement le profil enfant.");
       }

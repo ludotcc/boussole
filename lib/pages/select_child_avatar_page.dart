@@ -20,7 +20,7 @@ class SelectChildAvatarPage extends ConsumerStatefulWidget {
 
 class _SelectChildAvatarPageState extends ConsumerState<SelectChildAvatarPage> {
   final _firstNameController = TextEditingController();
-  final _ageController = TextEditingController();
+  DateTime? _birthDate;
   String _profileType = 'child';
   String _academyId = defaultSchoolAcademyId;
   Map<int, String> _weeklyRhythmByWeekday = const {
@@ -37,7 +37,6 @@ class _SelectChildAvatarPageState extends ConsumerState<SelectChildAvatarPage> {
   @override
   void dispose() {
     _firstNameController.dispose();
-    _ageController.dispose();
     super.dispose();
   }
 
@@ -61,7 +60,6 @@ class _SelectChildAvatarPageState extends ConsumerState<SelectChildAvatarPage> {
   Future<void> _saveChild({required bool addAnother}) async {
     final draft = ref.read(childCreationProvider);
     final firstName = _firstNameController.text.trim();
-    final age = int.tryParse(_ageController.text.trim());
 
     if (draft == null || draft.avatar.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -71,7 +69,7 @@ class _SelectChildAvatarPageState extends ConsumerState<SelectChildAvatarPage> {
       return;
     }
 
-    if (firstName.isEmpty || age == null || age <= 0) {
+    if (firstName.isEmpty || _birthDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Merci de compléter correctement tous les champs."),
@@ -89,7 +87,8 @@ class _SelectChildAvatarPageState extends ConsumerState<SelectChildAvatarPage> {
           .read(childCreationProvider.notifier)
           .updateInfo(
             firstName: firstName,
-            age: age,
+            age: _calculatedAge(_birthDate!),
+            birthDate: _birthDate,
             profileType: _profileType,
           );
       ref.read(childCreationProvider.notifier).updateAcademy(_academyId);
@@ -131,6 +130,31 @@ class _SelectChildAvatarPageState extends ConsumerState<SelectChildAvatarPage> {
       });
     }
   }
+
+  Future<void> _pickBirthDate() async {
+    final today = DateTime.now();
+    final selected = await showDatePicker(
+      context: context,
+      initialDate:
+          _birthDate ?? DateTime(today.year - 8, today.month, today.day),
+      firstDate: DateTime(today.year - 18),
+      lastDate: today,
+    );
+    if (selected != null && mounted) setState(() => _birthDate = selected);
+  }
+
+  int _calculatedAge(DateTime birthDate) {
+    final today = DateTime.now();
+    var age = today.year - birthDate.year;
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+    return age;
+  }
+
+  String _formatDate(DateTime date) =>
+      '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
 
   @override
   Widget build(BuildContext context) {
@@ -195,13 +219,18 @@ class _SelectChildAvatarPageState extends ConsumerState<SelectChildAvatarPage> {
                           ),
                         ),
                         const SizedBox(height: 18),
-                        TextField(
-                          controller: _ageController,
-                          keyboardType: TextInputType.number,
-                          decoration: _inputDecoration(
-                            label: "Âge",
-                            icon: Icons.cake_outlined,
+                        ListTile(
+                          key: const ValueKey('child_birth_date'),
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.cake_outlined),
+                          title: const Text('Date de naissance'),
+                          subtitle: Text(
+                            _birthDate == null
+                                ? 'À renseigner'
+                                : '${_formatDate(_birthDate!)} · ${_calculatedAge(_birthDate!)} ans',
                           ),
+                          trailing: const Icon(Icons.calendar_month_rounded),
+                          onTap: _isLoading ? null : _pickBirthDate,
                         ),
                         const SizedBox(height: 18),
                         DropdownButtonFormField<String>(

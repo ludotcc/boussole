@@ -1,4 +1,5 @@
 import 'child_model.dart';
+import 'child_companion_profile.dart';
 import 'parent_model.dart';
 
 enum FamilyMemberKind { adult, child }
@@ -8,6 +9,8 @@ class FamilyMemberModel {
   final String familyId;
   final String firstName;
   final int? age;
+  final DateTime? birthDate;
+  final ChildCompanionProfile companionProfile;
   final String avatar;
   final String profileType;
   final String? academyId;
@@ -20,6 +23,8 @@ class FamilyMemberModel {
     required this.familyId,
     required this.firstName,
     required this.age,
+    this.birthDate,
+    this.companionProfile = const ChildCompanionProfile(),
     required this.avatar,
     required this.profileType,
     this.academyId,
@@ -34,6 +39,7 @@ class FamilyMemberModel {
       familyId: parent.familyId,
       firstName: parent.firstName,
       age: parent.age,
+      birthDate: null,
       avatar: parent.avatar,
       profileType: parent.profileType,
       academyId: null,
@@ -49,6 +55,8 @@ class FamilyMemberModel {
       familyId: child.familyId,
       firstName: child.firstName,
       age: child.age,
+      birthDate: child.birthDate,
+      companionProfile: child.companionProfile,
       avatar: child.avatar,
       profileType: child.profileType,
       academyId: child.academyId,

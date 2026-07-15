@@ -6,6 +6,7 @@ enum ShardTransactionSource {
   dayCompletion,
   findingPurchase,
   secretMissionValidation,
+  celebration,
 }
 
 class ShardTransaction {

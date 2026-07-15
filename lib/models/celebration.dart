@@ -36,6 +36,22 @@ class Celebration {
   final int shardReward;
   final DateTime? deliveredAt;
 
+  factory Celebration.parentCreated({
+    required String id,
+    required String childId,
+    required CelebrationType type,
+    required String parentId,
+    required DateTime createdAt,
+    required bool givesShard,
+  }) => Celebration(
+    id: id,
+    childId: childId,
+    type: type,
+    createdByParentId: parentId,
+    createdAt: createdAt,
+    shardReward: givesShard ? 1 : 0,
+  );
+
   Map<String, dynamic> toMap() => {
     'childId': childId,
     'type': type.name,

@@ -30,6 +30,7 @@ class _FamilyMembersManagementPageState
     extends ConsumerState<FamilyMembersManagementPage> {
   final _firstNameController = TextEditingController();
   final _ageController = TextEditingController();
+  DateTime? _birthDate;
   String _profileType = 'papa';
   String? _selectedAvatar;
   bool _showForm = false;
@@ -46,8 +47,12 @@ class _FamilyMembersManagementPageState
     final firstName = _firstNameController.text.trim();
     final age = int.tryParse(_ageController.text.trim());
     final avatar = _selectedAvatar;
+    final isAdult = _profileType == 'papa' || _profileType == 'maman';
 
-    if (firstName.isEmpty || age == null || age <= 0 || avatar == null) {
+    if (firstName.isEmpty ||
+        avatar == null ||
+        (isAdult && (age == null || age <= 0)) ||
+        (!isAdult && _birthDate == null)) {
       _showMessage('Merci de compléter correctement le membre.');
       return;
     }
@@ -56,12 +61,12 @@ class _FamilyMembersManagementPageState
       _isLoading = true;
     });
 
-    if (_profileType == 'papa' || _profileType == 'maman') {
+    if (isAdult) {
       await ref
           .read(adultRegistrationProvider.notifier)
           .createAdultProfile(
             firstName: firstName,
-            age: age,
+            age: age!,
             profileType: _profileType,
             avatar: avatar,
           );
@@ -70,7 +75,8 @@ class _FamilyMembersManagementPageState
           .read(childRegistrationProvider.notifier)
           .createChildProfile(
             firstName: firstName,
-            age: age,
+            age: _calculatedAge(_birthDate!),
+            birthDate: _birthDate,
             avatar: avatar,
             profileType: _profileType,
           );
@@ -100,11 +106,34 @@ class _FamilyMembersManagementPageState
     _showMessage('Membre ajouté.');
   }
 
+  Future<void> _pickBirthDate() async {
+    final today = DateTime.now();
+    final selected = await showDatePicker(
+      context: context,
+      initialDate:
+          _birthDate ?? DateTime(today.year - 8, today.month, today.day),
+      firstDate: DateTime(today.year - 18),
+      lastDate: today,
+    );
+    if (selected != null && mounted) setState(() => _birthDate = selected);
+  }
+
+  int _calculatedAge(DateTime birthDate) {
+    final today = DateTime.now();
+    var age = today.year - birthDate.year;
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+    return age;
+  }
+
   void _resetForm() {
     setState(() {
       _firstNameController.clear();
       _ageController.clear();
       _profileType = 'papa';
+      _birthDate = null;
       _selectedAvatar = null;
       _showForm = false;
     });
@@ -190,6 +219,7 @@ class _FamilyMembersManagementPageState
                     FamilyMemberFormCard(
                       firstNameController: _firstNameController,
                       ageController: _ageController,
+                      birthDate: _birthDate,
                       profileType: _profileType,
                       selectedAvatar: _selectedAvatar,
                       isLoading: _isLoading,
@@ -204,6 +234,7 @@ class _FamilyMembersManagementPageState
                           _selectedAvatar = avatarId;
                         });
                       },
+                      onBirthDateTap: _pickBirthDate,
                       onSubmit: _addMember,
                       onCancel: _resetForm,
                     ),
